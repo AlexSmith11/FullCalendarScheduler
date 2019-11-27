@@ -1,20 +1,81 @@
 import React from 'react';
 import FullCalendar from '@fullcalendar/react'
+import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from '@fullcalendar/timegrid';
 
 import './main.scss'
 
-function App() {
-  return (
-    <FullCalendar 
-      defaultView="timeGridWeek"
-      plugins={[timeGridPlugin]}
-      weekends={false}
-      allDaySlot={false}
-      height="parent"
-      events='https://fullcalendar.io/demo-events.json'
-    />
-  );
+/**
+ * Code for the calendar component
+ * I hope you don't mind but I'm using JS classes instead of functional components for now.
+ * I'm learning FC's & Hooks, it's just that all my work so far has been using classes,
+ * so I feel more comfortable this way :)
+ * If I have time, I'll give converting all these into FC's a shot.
+ */
+
+export default class DemoApp extends React.Component {
+  calendarComponentRef = React.createRef();
+
+  state = {
+    calendarWeekends: true,
+    calendarEvents: [
+      // initial event data
+      { title: "Event Now", start: new Date() }
+    ]
+  };
+
+  toggleWeekends = () => {
+    this.setState({
+      // update a property
+      calendarWeekends: !this.state.calendarWeekends
+    });
+  };
+
+  // Set calendar start date
+  gotoPast = () => {
+    let calendarApi = this.calendarComponentRef.current.getApi();
+    calendarApi.gotoDate("2010-01-01");
+  };
+
+  render() {
+    return (
+      <div className="demo-app">
+        <div className="demo-app-top">
+          <button onClick={this.toggleWeekends}>toggle weekends</button>&nbsp;
+          <button onClick={this.gotoPast}>go to a date in the past</button>
+        </div>
+        <div className="demo-app-calendar">
+          <FullCalendar
+            defaultView="dayGridMonth"
+            header={{
+              left: "prev,next today",
+              center: "title",
+              right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
+            }}
+            plugins={[dayGridPlugin, timeGridPlugin]}
+            ref={this.calendarComponentRef}
+            weekends={this.state.calendarWeekends}
+            events={this.state.calendarEvents}
+            dateClick={this.handleDateClick}
+          />
+        </div>
+      </div>
+    );
+  }
 }
 
-export default App;
+// function App() {
+
+//   return (
+//     <FullCalendar 
+//       defaultView="timeGridWeek"
+//       plugins={[timeGridPlugin]}
+//       weekends={false}
+//       allDaySlot={false}
+//       height="parent"
+//       events='https://fullcalendar.io/demo-events.json'
+//     />
+//   );
+// }
+
+// export default App;
