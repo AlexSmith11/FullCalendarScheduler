@@ -1,8 +1,8 @@
 React app for Splunk Interview/Exercise.
 
------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Notes
------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Note conflicts:
 Meetings with marketing & HR conflict. As event is here first, reschedule the invite to a later time.
 
@@ -12,18 +12,18 @@ Implement validation: Some meetings have impossible times, such as the one with 
     ...OR do not use and throw error...
     Decide or ask Splunk guys.
 
------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Process
------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 API:
 First: Import the events. Assume these can be in conflict with each other - check rules provided by instructions.
     Sort conflicts by re-scheduling events throughout work week & within work hours.
 Second: Import invites. Assume conflicts - check rules provided by instructions.
     Sort conflicts by same method as above.
 
------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Implementation
------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Create a basic calendar app in React
 Import events from API
     Run validation on these to prevent bad dates/conflicts

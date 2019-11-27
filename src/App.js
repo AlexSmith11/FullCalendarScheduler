@@ -10,7 +10,7 @@ import './main.scss'
  * I hope you don't mind but I'm using JS classes instead of functional components for now.
  * I'm learning FC's & Hooks, it's just that all my work so far has been using classes,
  * so I feel more comfortable this way :)
- * If I have time, I'll give converting all these into FC's a shot.
+ * If I have enough time, I'll try converting all these into FC's.
  */
 
 export default class DemoApp extends React.Component {
@@ -22,6 +22,27 @@ export default class DemoApp extends React.Component {
       // initial event data
       { title: "Event Now", start: new Date() }
     ]
+  };
+
+  // Can get events as a JSON stream but need to validate them...
+  // Create a new event/invite
+  // Definitely probably not the best way...
+  handleNewDate = arg => {
+    if (newDateEvent) {
+      // Call some validation func here
+      this.setState({
+        // add new event
+        calendarEvents: this.state.calendarEvents.concat({
+          // creates a new obj
+          title: "New Event",
+          start: arg.date,
+          allDay: arg.allDay
+        })
+      });
+    }
+    if (newDateInvite) {
+      // Call some validation func here
+    }
   };
 
   toggleWeekends = () => {
