@@ -6,14 +6,6 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import './main.scss'
 import Axios from 'axios';
 
-/**
- * Code for the calendar component
- * I hope you don't mind but I'm using JS classes instead of functional components for now.
- * I'm learning FC's & Hooks, it's just that all my work so far has been using classes,
- * so I feel more comfortable this way :)
- * If I have enough time, I'll try converting whatever can be into FC's.
- */
-
 export default class DemoApp extends React.Component {
   calendarComponentRef = React.createRef();
 
@@ -21,17 +13,25 @@ export default class DemoApp extends React.Component {
     calendarWeekends: true,
     calendarEvents: [
       // initial event data
-      { title: "Event Now", start: new Date() }
+      { // this object will be "parsed" into an Event Object
+        title: 'The Title', // a property!
+        start: '2018-09-01', // a property!
+        end: '2018-09-02' // a property! ** see important note below about 'end' **
+      }
     ]
   };
+
+  componentDidMount() {
+    this.getEvent()
+  }
 
   // JSON Stream for EVENTS
   // Use Axios http request handler to GET req the API...
   // Then add events to the state.
   // Use seperate function to validate?
   // Add a toast when events have been added successfully!
-  getEvent = () => {
-    Axios.get('https://jsonplaceholder.typicode.com/todos'
+  getEvent = function() {
+    Axios.get('https://jsonplaceholder.typicode.com/todos' // Use proper add, this wont work
     // , {
     //   headers: {
     //     Authorization: 'token'
@@ -40,48 +40,56 @@ export default class DemoApp extends React.Component {
     )
       .then(response => {
         // Add events to the API via spread operator - preserves original state (immutability and all that).
+        console.log(response)
         const { events } = response
         // If I want to do something with the event obj, nows the time. 
-        validateEvents(events)
-        // If not:
-        this.setState({
+        this.validateEvents(events)
+
+        
+        // If not, set state:
+        // Also:
         // Could edit what gets put into state via forEach and:
         // calendarEvents: [...this.state.calendarEvents, event.(OBJECT_ID)]
+
+        console.log([...this.state.calendarEvents, { title: 'request', start: '2019-11-27' }])
+
+        this.setState({
           calendarEvents: [...this.state.calendarEvents, events]
         })
-        console.log(this.state.calendarEvents)
       })
   }
 
-  // Validate the events
+  // Validate the events with the ruleset provided
   validateEvents = (events) => {
+    console.log(events, 'in func')
+    return events
   }
 
 
-  // Can get events as a JSON stream but need to validate them...
-  // Create a new event/invite
-  // Definitely probably not the best way...
-  handleNewDate = arg => {
+  // // Can get events as a JSON stream but need to validate them...
+  // // Create a new event/invite
+  // // Definitely probably not the best way...
+  // handleNewDate = arg => {
 
-    var newDateEvent = true
-    var newDateInvite = true
+  //   var newDateEvent = true
+  //   var newDateInvite = true
 
-    if (newDateEvent) {
-      // Call some validation func here
-      this.setState({
-        // add new event
-        calendarEvents: this.state.calendarEvents.concat({
-          // creates a new obj
-          title: "New Event",
-          start: arg.date,
-          allDay: arg.allDay
-        })
-      });
-    }
-    if (newDateInvite) {
-      // Call some validation func here
-    }
-  };
+  //   if (newDateEvent) {
+  //     // Call some validation func here
+  //     this.setState({
+  //       // add new event
+  //       calendarEvents: this.state.calendarEvents.concat({
+  //         // creates a new obj
+  //         title: "New Event",
+  //         start: arg.date,
+  //         allDay: arg.allDay
+  //       })
+  //     });
+  //   }
+  //   if (newDateInvite) {
+  //     // Call some validation func here
+  //   }
+  // };
 
   toggleWeekends = () => {
     this.setState({
@@ -97,6 +105,8 @@ export default class DemoApp extends React.Component {
   };
 
   render() {
+    console.log(this.state.calendarEvents)
+
     return (
       <div className="demo-app">
         <div className="demo-app-top">
@@ -114,7 +124,7 @@ export default class DemoApp extends React.Component {
             plugins={[dayGridPlugin, timeGridPlugin]}
             ref={this.calendarComponentRef}
             weekends={this.state.calendarWeekends}
-            events={this.state.calendarEvents}
+            events={[{ title: 'erik test', start: '2019-11-28' }, { title: 'test 2', start: '2019-11-29' }]}
             dateClick={this.handleDateClick}
           />
         </div>

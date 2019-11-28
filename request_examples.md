@@ -43,6 +43,15 @@ Import invites from API (Press button event to do so or just automatically?)
     Display invites
 Button to refresh? Do this after...
 
+Comments:
+/**
+ * Code for the calendar component
+ * I hope you don't mind but I'm using JS classes instead of functional components for now.
+ * I'm learning FC's & Hooks, it's just that all my work so far has been using classes,
+ * so I feel more comfortable this way :)
+ * If I have enough time, I'll try converting whatever can be into FC's.
+ */
+
 Events:
 
 [
