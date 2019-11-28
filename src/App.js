@@ -4,6 +4,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from '@fullcalendar/timegrid';
 
 import './main.scss'
+import Axios from 'axios';
 
 /**
  * Code for the calendar component
@@ -21,13 +22,42 @@ export default class DemoApp extends React.Component {
     calendarEvents: [
       // initial event data
       { title: "Event Now", start: new Date() }
+      // May need to reformat property names. I.e. startTime should be start.
     ]
   };
+
+  // JSON Stream for EVENTS
+  // Use Axios http request handler to GET req the API...
+  // Then add events to the state.
+  // Use seperate function to parse & validate?
+  getEvent = () => {
+    Axios.get('http://...', {
+      headers: {
+        Authorization: 'token'
+      }
+    })
+      .then(response => {
+        // Add events to the API via spread operator - preserves original state (immutability and all that).
+        const { event } = response
+        // If I want to do something with the event obj, nows the time. If not:
+        this.setState({
+        // Could edit what gets put into state via forEach and:
+        // calendarEvents: [...this.state.calendarEvents, event.(OBJECT_ID)]
+          calendarEvents: [...this.state.calendarEvents, event]
+        })
+        console.log(this.state.calendarEvents)
+      })
+  }
+
 
   // Can get events as a JSON stream but need to validate them...
   // Create a new event/invite
   // Definitely probably not the best way...
   handleNewDate = arg => {
+
+    var newDateEvent = true
+    var newDateInvite = true
+
     if (newDateEvent) {
       // Call some validation func here
       this.setState({

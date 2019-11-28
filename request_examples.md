@@ -12,6 +12,25 @@ Implement validation: Some meetings have impossible times, such as the one with 
     ...OR do not use and throw error...
     Decide or ask Splunk guys.
 
+https://fullcalendar.io/docs/resource-parsing
+Resources are taken and parsed into these. Do I need to parse the json array after importing so 
+the objects can be used properly? Use:
+https://stackoverflow.com/questions/52038754/javascript-add-an-id-for-each-object-object-json
+Using the map func:
+var arrayStuff = [{
+  "language": "Python1",
+  "created": "2018-8-27 14:50:31",
+  "evaluated": true,
+  "hiddenCode": false
+}, {
+  "language": "Python2",
+  "created": "2018-8-27 14:50:31",
+  "evaluated": true,
+  "hiddenCode": false
+}]
+const indexed = arrayStuff.map((item, index) => Object.assign(item, { index }))
+console.log(indexed)
+
 ----------------------------------------------------------------------------------------------------
 Process
 ----------------------------------------------------------------------------------------------------
@@ -25,6 +44,11 @@ Second: Import invites. Assume conflicts - check rules provided by instructions.
 Implementation
 ----------------------------------------------------------------------------------------------------
 Create a basic calendar app in React
+
+Calendar structured as such:
+    Initialises with events (performs a GET for the events on start/refresh of page)
+    Press a button to 'check for' (import) invites.
+
 Import events from API
     Run validation on these to prevent bad dates/conflicts
     Reschedule these
