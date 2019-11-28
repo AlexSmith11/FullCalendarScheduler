@@ -12,24 +12,8 @@ Implement validation: Some meetings have impossible times, such as the one with 
     ...OR do not use and throw error...
     Decide or ask Splunk guys.
 
-https://fullcalendar.io/docs/resource-parsing
-Resources are taken and parsed into these. Do I need to parse the json array after importing so 
-the objects can be used properly? Use:
-https://stackoverflow.com/questions/52038754/javascript-add-an-id-for-each-object-object-json
-Using the map func:
-var arrayStuff = [{
-  "language": "Python1",
-  "created": "2018-8-27 14:50:31",
-  "evaluated": true,
-  "hiddenCode": false
-}, {
-  "language": "Python2",
-  "created": "2018-8-27 14:50:31",
-  "evaluated": true,
-  "hiddenCode": false
-}]
-const indexed = arrayStuff.map((item, index) => Object.assign(item, { index }))
-console.log(indexed)
+NOTE: NEVERMIND on parsing incoming json! startTime and endTime are expected properties:
+https://fullcalendar.io/docs/event-parsing
 
 ----------------------------------------------------------------------------------------------------
 Process

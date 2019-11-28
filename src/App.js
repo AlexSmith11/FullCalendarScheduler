@@ -11,7 +11,7 @@ import Axios from 'axios';
  * I hope you don't mind but I'm using JS classes instead of functional components for now.
  * I'm learning FC's & Hooks, it's just that all my work so far has been using classes,
  * so I feel more comfortable this way :)
- * If I have enough time, I'll try converting all these into FC's.
+ * If I have enough time, I'll try converting whatever can be into FC's.
  */
 
 export default class DemoApp extends React.Component {
@@ -22,31 +22,39 @@ export default class DemoApp extends React.Component {
     calendarEvents: [
       // initial event data
       { title: "Event Now", start: new Date() }
-      // May need to reformat property names. I.e. startTime should be start.
     ]
   };
 
   // JSON Stream for EVENTS
   // Use Axios http request handler to GET req the API...
   // Then add events to the state.
-  // Use seperate function to parse & validate?
+  // Use seperate function to validate?
+  // Add a toast when events have been added successfully!
   getEvent = () => {
-    Axios.get('http://...', {
-      headers: {
-        Authorization: 'token'
-      }
-    })
+    Axios.get('https://jsonplaceholder.typicode.com/todos'
+    // , {
+    //   headers: {
+    //     Authorization: 'token'
+    //   }
+    // }
+    )
       .then(response => {
         // Add events to the API via spread operator - preserves original state (immutability and all that).
-        const { event } = response
-        // If I want to do something with the event obj, nows the time. If not:
+        const { events } = response
+        // If I want to do something with the event obj, nows the time. 
+        validateEvents(events)
+        // If not:
         this.setState({
         // Could edit what gets put into state via forEach and:
         // calendarEvents: [...this.state.calendarEvents, event.(OBJECT_ID)]
-          calendarEvents: [...this.state.calendarEvents, event]
+          calendarEvents: [...this.state.calendarEvents, events]
         })
         console.log(this.state.calendarEvents)
       })
+  }
+
+  // Validate the events
+  validateEvents = (events) => {
   }
 
 
