@@ -104,19 +104,6 @@ then check next event/invite and see if it overlaps with the next event/invite.
 
 have chache var to store overlaps. after each node see if there is space between current node and the next one
 
-Have vars:
-Array<Proceeding> events; 
-Array<Proceeding> invites; 
-Array<Proceeding> eventsCache, 
-Array<Proceeding>invitesCache, 
-Int eventIndex, 
-Int inviteIndex, 
-Array<Proceeding> proceedings;
-Class Proceeding {
-  String name;
-  String startTime;
-  String endTime;
-};
 
 HAVE:
 - descriptive function names so you dont need to look at the code to know what it does.
