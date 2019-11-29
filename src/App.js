@@ -1,28 +1,34 @@
-import React from 'react';
-import FullCalendar from '@fullcalendar/react'
+import React from "react";
+import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from '@fullcalendar/timegrid';
+import timeGridPlugin from "@fullcalendar/timegrid";
 
-import './main.scss'
-import Axios from 'axios';
+import "./main.scss";
+import Axios from "axios";
 
-export default class DemoApp extends React.Component {
+export default class App extends React.Component {
   calendarComponentRef = React.createRef();
 
   state = {
-    calendarWeekends: true,
+    weekends: false,
     calendarEvents: [
       // initial event data
-      { // this object will be "parsed" into an Event Object
-        title: 'The Title', // a property!
-        start: '2018-09-01', // a property!
-        end: '2018-09-02' // a property! ** see important note below about 'end' **
+      {
+        // this object will be "parsed" into an Event Object
+        title: "The Title", // a property!
+        start: "2018-09-01", // a property!
+        end: "2018-09-02" // a property! ** see important note below about 'end' **
+      },
+      {
+        name: "Meeting with Marketing",
+        startTime: "2019-11-27 09:30:00",
+        endTime: "2019-11-27 10:30:00"
       }
     ]
   };
 
   componentDidMount() {
-    this.getEvent()
+    this.getEvent();
   }
 
   // JSON Stream for EVENTS
@@ -30,66 +36,38 @@ export default class DemoApp extends React.Component {
   // Then add events to the state.
   // Use seperate function to validate?
   // Add a toast when events have been added successfully!
-  getEvent = function() {
-    Axios.get('https://jsonplaceholder.typicode.com/todos' // Use proper add, this wont work
-    // , {
-    //   headers: {
-    //     Authorization: 'token'
-    //   }
-    // }
-    )
-      .then(response => {
-        // Add events to the API via spread operator - preserves original state (immutability and all that).
-        console.log(response)
-        const { events } = response
-        // If I want to do something with the event obj, nows the time. 
-        this.validateEvents(events)
-
-        
-        // If not, set state:
-        // Also:
-        // Could edit what gets put into state via forEach and:
-        // calendarEvents: [...this.state.calendarEvents, event.(OBJECT_ID)]
-
-        console.log([...this.state.calendarEvents, { title: 'request', start: '2019-11-27' }])
-
+  // Create an ENV file to store API keys and addresses?
+  // Use await/async to prevent load before GET returned (when using hooks)
+  getEvent = () => {
+    Axios.get(
+      "https://dyhm3xstr8.execute-api.us-east-2.amazonaws.com/dev/events/get",
+      {
+        headers: {
+          Authorization: "c31912bb-0b58-42d1-a9a0-c521ecc98cdf"
+        }
+      }
+    ).then(response => {
+      if (response.status === 200 && response != null) {
+        var events = response.data;
         this.setState({
-          calendarEvents: [...this.state.calendarEvents, events]
-        })
-      })
-  }
+          // Add events to the API via spread operator - preserves original state (immutability and all that).
+          calendarEvents: [...this.state.calendarEvents, ...events]
+        });
+      } else {
+        throw new Error("Something's wrong - Check your API feed or server");
+      }
+
+      console.log("calendar state: ", this.state.calendarEvents);
+
+      this.validateEvents(events);
+    });
+  };
 
   // Validate the events with the ruleset provided
-  validateEvents = (events) => {
-    console.log(events, 'in func')
-    return events
-  }
-
-
-  // // Can get events as a JSON stream but need to validate them...
-  // // Create a new event/invite
-  // // Definitely probably not the best way...
-  // handleNewDate = arg => {
-
-  //   var newDateEvent = true
-  //   var newDateInvite = true
-
-  //   if (newDateEvent) {
-  //     // Call some validation func here
-  //     this.setState({
-  //       // add new event
-  //       calendarEvents: this.state.calendarEvents.concat({
-  //         // creates a new obj
-  //         title: "New Event",
-  //         start: arg.date,
-  //         allDay: arg.allDay
-  //       })
-  //     });
-  //   }
-  //   if (newDateInvite) {
-  //     // Call some validation func here
-  //   }
-  // };
+  validateEvents = events => {
+    console.log("validate event function: ", events);
+    return events;
+  };
 
   toggleWeekends = () => {
     this.setState({
@@ -105,7 +83,7 @@ export default class DemoApp extends React.Component {
   };
 
   render() {
-    console.log(this.state.calendarEvents)
+    console.log("In the render: ", this.state.calendarEvents);
 
     return (
       <div className="demo-app">
@@ -115,17 +93,22 @@ export default class DemoApp extends React.Component {
         </div>
         <div className="demo-app-calendar">
           <FullCalendar
-            defaultView="dayGridMonth"
+            defaultView="timeGridWeek"
+            plugins={[dayGridPlugin, timeGridPlugin]}
+            ref={this.calendarComponentRef}
+            weekends={this.state.weekends}
+            allDaySlot={false}
+            height="parent"
+            // events={this.state.calendarEvents}
+            events={[
+              { title: "erik test", startTime: "2019-11-28t09:30:00" },
+              { title: "test 2", start: "2019-11-29" }
+            ]}
             header={{
               left: "prev,next today",
               center: "title",
               right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
             }}
-            plugins={[dayGridPlugin, timeGridPlugin]}
-            ref={this.calendarComponentRef}
-            weekends={this.state.calendarWeekends}
-            events={[{ title: 'erik test', start: '2019-11-28' }, { title: 'test 2', start: '2019-11-29' }]}
-            dateClick={this.handleDateClick}
           />
         </div>
       </div>
@@ -136,7 +119,7 @@ export default class DemoApp extends React.Component {
 // function App() {
 
 //   return (
-//     <FullCalendar 
+//     <FullCalendar
 //       defaultView="timeGridWeek"
 //       plugins={[timeGridPlugin]}
 //       weekends={false}
@@ -146,5 +129,7 @@ export default class DemoApp extends React.Component {
 //     />
 //   );
 // }
+
+// Also have: dateClick={this.handleDateClick}
 
 // export default App;
