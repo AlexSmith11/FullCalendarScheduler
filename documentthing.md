@@ -11,6 +11,30 @@ Process:
 5# fill in unused invites
 
 
+SO (summary):
+
+this.validateEvents(events);
+
+  /**Validate the events with the ruleset provided
+  Class Proceeding {
+    String name;
+    String startTime;
+    String endTime;
+  };
+  */
+  validateEvents = allEvents => {
+    const [events] // initial array of events from API
+    const [invites] // initial array of invites from API
+    const [eventsCache] // removed events that clashed with other events
+    const [invitesCache] // removed invites that clashed with other invites
+    const eventIndex  // int to count place in event array we are at
+    const inviteindex // Same as above for inv
+    const [sortedEvents] // All events and invites sorted into one array
+
+
+    console.log("validate event function: ", allEvents);
+    return allEvents;
+  };
 
 
 
@@ -40,6 +64,4 @@ Class Proceeding {
 HAVE:
 - descriptive function names so you dont need to look at the code to know what it does.
 
-
-SO (Alex summary):
 

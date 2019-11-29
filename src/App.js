@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -6,13 +6,13 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import "./main.scss";
 import Axios from "axios";
 
-export default class App extends React.Component {
+class App extends Component {
   calendarComponentRef = React.createRef();
 
   state = {
     weekends: false,
     calendarEvents: [
-      // initial event data
+      // initial event data (Remove on production - this is for testing)
       {
         // this object will be "parsed" into an Event Object
         title: "The Title", // a property!
@@ -24,8 +24,8 @@ export default class App extends React.Component {
         startTime: "2019-11-27",
         endTime: "2019-11-27"
       },
-      { 
-        title: "erik test", 
+      {
+        title: "erik test",
         startTime: "09:30",
         endTime: "10:30"
       },
@@ -55,9 +55,7 @@ export default class App extends React.Component {
     Axios.get(
       "https://dyhm3xstr8.execute-api.us-east-2.amazonaws.com/dev/events/get",
       {
-        headers: {
-          Authorization: "c31912bb-0b58-42d1-a9a0-c521ecc98cdf"
-        }
+        headers: { Authorization: "c31912bb-0b58-42d1-a9a0-c521ecc98cdf" }
       }
     ).then(response => {
       if (response.status === 200 && response != null) {
@@ -72,15 +70,10 @@ export default class App extends React.Component {
 
       console.log("calendar state: ", this.state.calendarEvents);
 
-      this.validateEvents(events);
     });
   };
 
-  // Validate the events with the ruleset provided
-  validateEvents = events => {
-    console.log("validate event function: ", events);
-    return events;
-  };
+
 
   toggleWeekends = () => {
     this.setState({
@@ -129,7 +122,6 @@ export default class App extends React.Component {
 
 //   return (
 //     <FullCalendar
-//       defaultView="timeGridWeek"
 //       plugins={[timeGridPlugin]}
 //       weekends={false}
 //       allDaySlot={false}
@@ -141,4 +133,4 @@ export default class App extends React.Component {
 
 // Also have: dateClick={this.handleDateClick}
 
-// export default App;
+export default App;
