@@ -21,11 +21,24 @@ export default class App extends React.Component {
       },
       {
         name: "Meeting with Marketing",
-        startTime: "2019-11-27 09:30:00",
-        endTime: "2019-11-27 10:30:00"
+        startTime: "2019-11-27",
+        endTime: "2019-11-27"
+      },
+      { 
+        title: "erik test", 
+        startTime: "09:30",
+        endTime: "10:30"
+      },
+      {
+        title: "test 2",
+        start: "2019-11-29 10:30:00"
       }
     ]
   };
+  // Do I wanna do this..?
+  // https://stackoverflow.com/questions/51125456/how-to-rename-object-data-response-in-react
+  // What I get: https://fullcalendar.io/docs/duration-object, https://fullcalendar.io/docs/recurring-events
+  // What I want: https://fullcalendar.io/docs/date-parsing
 
   componentDidMount() {
     this.getEvent();
@@ -99,11 +112,7 @@ export default class App extends React.Component {
             weekends={this.state.weekends}
             allDaySlot={false}
             height="parent"
-            // events={this.state.calendarEvents}
-            events={[
-              { title: "erik test", startTime: "2019-11-28t09:30:00" },
-              { title: "test 2", start: "2019-11-29" }
-            ]}
+            events={this.state.calendarEvents}
             header={{
               left: "prev,next today",
               center: "title",
