@@ -44,7 +44,11 @@ process:
 // cachedNode = a node that has been taken out of the event or invite arrays due to it overunning 5pm
 // cachedNodeDiff = length of time of a cached event (cachedNodeDiff = len of event)
 
-// First need to rename object parameter names so they work with the calendar plugin
+// Get JSON
+use axios with auth header 
+
+// Then need to rename object parameter names so they work with the calendar plugin
+Use map() to do this, just assigning the data to new property names in new array 
 
 // Then need to remove dupes
 
@@ -64,7 +68,8 @@ if (node2(start) < node1(end)) {                                    // Loop over
   insertIntoSpareTime(nodeDiff, node1(end), node2(start))   // Every time there is a spare time slot, try to find an event that will fit
 }
 
-if(node1(end) > 17:00:00) {                // Then after each node sorted, check no events are after 5pm. If there are, remove and add to cache
+// Then after each node sorted, check no events are after 5pm. If there are, remove and add to cache
+if(node1(end) > 17:00:00) {                
   cachedNodeX concat or [...] or whatever. Add to cache.
   // Increment to next day
 }

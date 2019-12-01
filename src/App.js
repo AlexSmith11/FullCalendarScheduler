@@ -5,94 +5,83 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 
 import "./main.scss";
 import Axios from "axios";
+import { formatEvents } from "./utils/formatEvents.js";
+import {removeDuplicates} from "./utils/removeDuplicates.js";
+
+/**
+ * Notes:
+ * Add a toast when events have been added successfully!
+ * Create an ENV file to store API keys and addresses?
+ */
 
 class App extends Component {
   calendarComponentRef = React.createRef();
 
   state = {
     weekends: false,
-    calendarEvents: [
-      // initial event data (Remove on production - this is for testing)
-      {
-        // this object will be "parsed" into an Event Object
-        title: "The Title", // a property!
-        start: "2018-09-01", // a property!
-        end: "2018-09-02" // a property! ** see important note below about 'end' **
-      },
-      {
-        name: "Meeting with Marketing",
-        startTime: "2019-11-27",
-        endTime: "2019-11-27"
-      },
-      {
-        title: "erik test",
-        startTime: "09:30",
-        endTime: "10:30"
-      },
-      {
-        title: "test 2",
-        start: "2019-11-29 10:30:00"
-      }
-    ]
+    calendarEvents: [],
+    renamedInvites: [],
+    renamedEvents: []
   };
-  // Do I wanna do this..?
-  // https://stackoverflow.com/questions/51125456/how-to-rename-object-data-response-in-react
-  // What I get: https://fullcalendar.io/docs/duration-object, https://fullcalendar.io/docs/recurring-events
-  // What I want: https://fullcalendar.io/docs/date-parsing
 
   componentDidMount() {
     this.getEvent();
+    // if (!this.state.renamedEvents != null) {  // This is reallt bad maybe
+    //   this.removeDuplicates()
+    // }
   }
 
   // JSON Stream for EVENTS
-  // Use Axios http request handler to GET req the API...
-  // Then add events to the state.
-  // Use seperate function to validate?
-  // Add a toast when events have been added successfully!
-  // Create an ENV file to store API keys and addresses?
-  // Use await/async to prevent load before GET returned (when using hooks)
+  // Get req the API and assign response to state after 
   getEvent = () => {
     Axios.get(
       "https://dyhm3xstr8.execute-api.us-east-2.amazonaws.com/dev/events/get",
-      {
-        headers: { Authorization: "c31912bb-0b58-42d1-a9a0-c521ecc98cdf" }
-      }
-    ).then(response => {
-      if (response.status === 200 && response != null) {
-        var events = response.data;
-        this.setState({
-          // Add events to the API via spread operator - preserves original state (immutability and all that).
-          calendarEvents: [...this.state.calendarEvents, ...events]
-        });
-      } else {
-        throw new Error("Something's wrong - Check your API feed or server");
-      }
-
-
-      this.validateEvents(events);
-
-
-      console.log("calendar state: ", this.state.calendarEvents);
-
-    });
+      { headers: { Authorization: "c31912bb-0b58-42d1-a9a0-c521ecc98cdf" } }
+    )
+      .then(response => {
+        this.renameEvents(response)})
+      .catch(this.onResopnseFail);
   };
 
+  /**
+   * Take response and rename event params
+   */
+  renameEvents = ({ data }) => {
+    // Rename date object properties
+    const formattedEvents = formatEvents(data);
+    // Add events to the state via spread operator - preserves original state (immutability and all that).
+    this.setState({
+      renamedEvents: [...this.state.renamedEvents, ...formattedEvents]
+    });
+    this.addAllToCalendar()
+  };
 
-  /**Validate the events with the ruleset provided
-  */
+  // removeDuplicates = () => {
+
+  // }
+
+  /**
+   * Validate the events with the ruleset provided
+   */
   validateEvents = allEvents => {
-  //   const [events] // initial array of events from API
-  //   const [invites] // initial array of invites from API
-  //   const [eventsCache] // removed events that clashed with other events
-  //   const [invitesCache] // removed invites that clashed with other invites
-  //   const eventIndex  // int to count place in event array we are at
-  //   const inviteindex // Same as above for inv
-  //   const [sortedEvents] // All events and invites sorted into one array
-
+    //   const [events] // initial array of events from API
+    //   const [invites] // initial array of invites from API
+    //   const [eventsCache] // removed events that clashed with other events
+    //   const [invitesCache] // removed invites that clashed with other invites
+    //   const eventIndex  // int to count place in event array we are at
+    //   const inviteindex // Same as above for inv
+    //   const [sortedEvents] // All events and invites sorted into one array
 
     console.log("validate event function: ", allEvents);
     return allEvents;
   };
+
+  // Set the calendars state
+  addAllToCalendar = () => {
+    this.setState({
+      calendarEvents: this.state.renamedEvents
+    })
+  }
 
   toggleWeekends = () => {
     this.setState({
@@ -107,8 +96,10 @@ class App extends Component {
     calendarApi.gotoDate("2010-01-01");
   };
 
+  onResponseFail = () => {};
+
   render() {
-    console.log("In the render: ", this.state.calendarEvents);
+    console.log("In the render: ", this.state.renamedEvents);
 
     return (
       <div className="demo-app">
@@ -137,18 +128,12 @@ class App extends Component {
   }
 }
 
-// function App() {
-
-//   return (
-//     <FullCalendar
-//       plugins={[timeGridPlugin]}
-//       weekends={false}
-//       allDaySlot={false}
-//       height="parent"
-//       events='https://fullcalendar.io/demo-events.json'
-//     />
-//   );
-// }
+// Calendar Params:
+//  plugins={[timeGridPlugin]}
+//  weekends={false}
+//  allDaySlot={false}
+//  height="parent"
+//  events='https://fullcalendar.io/demo-events.json'
 
 // Also have: dateClick={this.handleDateClick}
 
