@@ -5,7 +5,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 
 import "./main.scss";
 import Axios from "axios";
-import { formatEvents } from "./utils/formatEvents.js";
+import { formatParamNames } from "./utils/formatParamNames.js";
 import {removeDuplicates} from "./utils/removeDuplicates.js";
 
 /**
@@ -26,9 +26,6 @@ class App extends Component {
 
   componentDidMount() {
     this.getEvent();
-    // if (!this.state.renamedEvents != null) {  // This is reallt bad maybe
-    //   this.removeDuplicates()
-    // }
   }
 
   // JSON Stream for EVENTS
@@ -48,17 +45,28 @@ class App extends Component {
    */
   renameEvents = ({ data }) => {
     // Rename date object properties
-    const formattedEvents = formatEvents(data);
+    const formattedEvents = formatParamNames(data);
     // Add events to the state via spread operator - preserves original state (immutability and all that).
     this.setState({
       renamedEvents: [...this.state.renamedEvents, ...formattedEvents]
     });
+    
+    const tmpRenamedEvents = this.state.renamedEvents
+    this.removeDuplicateEvents(tmpRenamedEvents)
+    
     this.addAllToCalendar()
   };
 
-  // removeDuplicates = () => {
+  /**
+   * remove duplicates from the calendar
+   */
+  removeDuplicateEvents = (data) => {
 
-  // }
+    console.log(data)
+    const removed = removeDuplicates(data);
+    // set state...
+    console.log(removed)
+  }
 
   /**
    * Validate the events with the ruleset provided
