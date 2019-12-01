@@ -44,6 +44,14 @@ process:
 // cachedNode = a node that has been taken out of the event or invite arrays due to it overunning 5pm
 // cachedNodeDiff = length of time of a cached event (cachedNodeDiff = len of event)
 
+// First need to rename object parameter names so they work with the calendar plugin
+
+// Then need to remove dupes
+
+// Then sort
+just a simple sort via object start param
+
+// Then we start validation on event timings
 // This is for the individual event or invite arrays. Once gone through one of the conditions, add to main array. 
 if (node2(start) < node1(end)) {                                    // Loop over events -> true if the next node starts before current one ends
   node1(end) - node2(start) = nodeConflictDiff                      // We reschedule for after the currrent node
