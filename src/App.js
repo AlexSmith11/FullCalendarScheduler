@@ -81,13 +81,13 @@ class App extends Component {
   /**Validate the events with the ruleset provided
   */
   validateEvents = allEvents => {
-    const [events] // initial array of events from API
-    const [invites] // initial array of invites from API
-    const [eventsCache] // removed events that clashed with other events
-    const [invitesCache] // removed invites that clashed with other invites
-    const eventIndex  // int to count place in event array we are at
-    const inviteindex // Same as above for inv
-    const [sortedEvents] // All events and invites sorted into one array
+  //   const [events] // initial array of events from API
+  //   const [invites] // initial array of invites from API
+  //   const [eventsCache] // removed events that clashed with other events
+  //   const [invitesCache] // removed invites that clashed with other invites
+  //   const eventIndex  // int to count place in event array we are at
+  //   const inviteindex // Same as above for inv
+  //   const [sortedEvents] // All events and invites sorted into one array
 
 
     console.log("validate event function: ", allEvents);
