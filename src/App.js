@@ -6,7 +6,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import "./main.scss";
 import Axios from "axios";
 import { formatParamNames } from "./utils/formatParamNames.js";
-import {removeDuplicates} from "./utils/removeDuplicates.js";
+import { removeDuplicates } from "./utils/removeDuplicates.js";
 
 /**
  * Notes:
@@ -29,14 +29,15 @@ class App extends Component {
   }
 
   // JSON Stream for EVENTS
-  // Get req the API and assign response to state after 
+  // Get req the API and assign response to state after
   getEvent = () => {
     Axios.get(
       "https://dyhm3xstr8.execute-api.us-east-2.amazonaws.com/dev/events/get",
       { headers: { Authorization: "c31912bb-0b58-42d1-a9a0-c521ecc98cdf" } }
     )
       .then(response => {
-        this.renameEvents(response)})
+        this.renameEvents(response);
+      })
       .catch(this.onResopnseFail);
   };
 
@@ -50,23 +51,23 @@ class App extends Component {
     this.setState({
       renamedEvents: [...this.state.renamedEvents, ...formattedEvents]
     });
-    
-    const tmpRenamedEvents = this.state.renamedEvents
-    this.removeDuplicateEvents(tmpRenamedEvents)
-    
-    this.addAllToCalendar()
+
+    const tmpRenamedEvents = this.state.renamedEvents;
+    this.removeDuplicateEvents(tmpRenamedEvents);
+
+    this.addAllToCalendar();
   };
 
   /**
    * remove duplicates from the calendar
    */
-  removeDuplicateEvents = (data) => {
+  removeDuplicateEvents = data => {
+    const removed = removeDuplicates(data)
+    console.log(removed);
+    
+    // Next func
 
-    console.log(data)
-    const removed = removeDuplicates(data);
-    // set state...
-    console.log(removed)
-  }
+  };
 
   /**
    * Validate the events with the ruleset provided
@@ -88,8 +89,8 @@ class App extends Component {
   addAllToCalendar = () => {
     this.setState({
       calendarEvents: this.state.renamedEvents
-    })
-  }
+    });
+  };
 
   toggleWeekends = () => {
     this.setState({

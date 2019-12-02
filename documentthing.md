@@ -51,6 +51,7 @@ use axios with auth header
 Use map() to do this, just assigning the data to new property names in new array 
 
 // Then need to remove dupes
+Used a filter with map
 
 // Then sort
 just a simple sort via object start param
@@ -142,3 +143,34 @@ HAVE:
 - descriptive function names so you dont need to look at the code to know what it does.
 
 
+TEST DATA:
+    var test = [
+      {
+        title: "Meeting with Marketing",
+        start: "2019-10-28 09:30:00",
+        end: "2019-10-28 10:30:00"
+      },
+      {
+        title: "Canidate Interview",
+        start: "2019-10-28 10:30:00",
+        end: "2019-10-28 12:00:00"
+      },
+      {
+        title: "Canidate Interview",
+        start: "2019-10-28 10:30:00",
+        end: "2019-10-28 12:00:00"
+      },
+      {
+        title: "Canidate Interview",
+        start: "2019-10-28 11:30:00",   // This isn't a duplicate
+        end: "2019-10-28 12:00:00"
+      },
+      {
+        title: "FDSE SCRUM",
+        start: "2019-10-30 14:15:00",
+        end: "2019-10-28 14:45:00"
+      }
+    ];
+
+How to make this all better:
+Differentiate between the event and invite arrays. Append an empty obj to the end and scan for it?
