@@ -10,7 +10,7 @@ export function removeDuplicates(items) {
   // 	return !this[title] && (this[title] = title)
   // }, {})
 
-  // Filter via all obj params
+  // Filter via all obj params - In this case, use all 3
   const keys = ["title", "start", "end"];
   const duplicatesRemoved = items.filter(
     (outer => obj =>

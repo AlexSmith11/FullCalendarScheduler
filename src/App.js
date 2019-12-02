@@ -7,6 +7,7 @@ import "./main.scss";
 import Axios from "axios";
 import { formatParamNames } from "./utils/formatParamNames.js";
 import { removeDuplicates } from "./utils/removeDuplicates.js";
+import { sortObjects } from "./utils/sortObjects";
 
 /**
  * Notes:
@@ -52,6 +53,7 @@ class App extends Component {
       renamedEvents: [...this.state.renamedEvents, ...formattedEvents]
     });
 
+    // Now remove duplicates
     const tmpRenamedEvents = this.state.renamedEvents;
     this.removeDuplicateEvents(tmpRenamedEvents);
 
@@ -62,11 +64,12 @@ class App extends Component {
    * remove duplicates from the calendar
    */
   removeDuplicateEvents = data => {
-    const removed = removeDuplicates(data)
+    const removed = removeDuplicates(data);
     console.log(removed);
-    
-    // Next func
 
+    // Now sort objects (sort after removal of dupes as sort will now be faster)
+    const sorted = sortObjects(removed);
+    console.log(sorted);
   };
 
   /**
@@ -99,7 +102,7 @@ class App extends Component {
     });
   };
 
-  // Set calendar start date
+  // Set calendar 'start' date
   gotoPast = () => {
     let calendarApi = this.calendarComponentRef.current.getApi();
     calendarApi.gotoDate("2010-01-01");
