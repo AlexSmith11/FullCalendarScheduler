@@ -18,9 +18,6 @@ export function removeDuplicates(items) {
         keys.map(inner => obj[inner]).join("|")
       ))(new Set())
   );
-
-  console.log(duplicatesRemoved);
-
   return duplicatesRemoved
 }
 

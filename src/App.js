@@ -21,8 +21,8 @@ class App extends Component {
   state = {
     weekends: false,
     calendarEvents: [],
-    renamedInvites: [],
-    renamedEvents: []
+    sortedEvents: [],
+    sortedInvites: []
   };
 
   componentDidMount() {
@@ -46,18 +46,11 @@ class App extends Component {
    * Take response and rename event params
    */
   renameEvents = ({ data }) => {
-    // Rename date object properties
     const formattedEvents = formatParamNames(data);
-    // Add events to the state via spread operator - preserves original state (immutability and all that).
-    this.setState({
-      renamedEvents: [...this.state.renamedEvents, ...formattedEvents]
-    });
-
+    
     // Now remove duplicates
-    const tmpRenamedEvents = this.state.renamedEvents;
-    this.removeDuplicateEvents(tmpRenamedEvents);
+    this.removeDuplicateEvents(formattedEvents);
 
-    this.addAllToCalendar();
   };
 
   /**
@@ -65,17 +58,32 @@ class App extends Component {
    */
   removeDuplicateEvents = data => {
     const removed = removeDuplicates(data);
-    console.log(removed);
 
     // Now sort objects (sort after removal of dupes as sort will now be faster)
-    const sorted = sortObjects(removed);
-    console.log(sorted);
+    this.sortEventObjects(removed)
   };
+
+  /**
+   * sort events
+   */
+  sortEventObjects = data => {
+    const sorted = sortObjects(data);
+    console.log(sorted);
+
+    // Now for the main bit: validation
+    this.validateEvents(sorted)
+
+    // And add sorted events to Cal state
+    this.setState({
+      sortedEvents: [...this.state.sortedEvents, ...sorted]
+    });
+    this.addAllToCalendar();
+  }
 
   /**
    * Validate the events with the ruleset provided
    */
-  validateEvents = allEvents => {
+  validateEvents = data => {
     //   const [events] // initial array of events from API
     //   const [invites] // initial array of invites from API
     //   const [eventsCache] // removed events that clashed with other events
@@ -84,14 +92,20 @@ class App extends Component {
     //   const inviteindex // Same as above for inv
     //   const [sortedEvents] // All events and invites sorted into one array
 
-    console.log("validate event function: ", allEvents);
-    return allEvents;
+    /**
+     * Want separate functions to: (?)
+     * reschedule events with times after/before 5pm/9am
+     * reschedule events that clash 
+     */
+
+    console.log("validate event function: ", data);
+    return data;
   };
 
   // Set the calendars state
   addAllToCalendar = () => {
     this.setState({
-      calendarEvents: this.state.renamedEvents
+      calendarEvents: this.state.sortedEvents
     });
   };
 
@@ -111,7 +125,7 @@ class App extends Component {
   onResponseFail = () => {};
 
   render() {
-    console.log("In the render: ", this.state.renamedEvents);
+    console.log("In the render: ", this.state.calendarEvents);
 
     return (
       <div className="demo-app">
