@@ -10,13 +10,11 @@ import { removeDuplicates } from "./utils/removeDuplicates.js";
 import { sortObjects } from "./utils/sortObjects.js";
 import { checkHours } from "./utils/checkHours.js";
 
-
 /**
  * Notes:
  * Add a toast when events have been added successfully!
  * Create an ENV file to store API keys and addresses?
  */
-
 class App extends Component {
   calendarComponentRef = React.createRef();
 
@@ -28,21 +26,30 @@ class App extends Component {
   };
 
   componentDidMount() {
-    this.getEvent();
+    this.getData();
   }
 
-  // JSON Stream for EVENTS
-  // Get req the API and assign response to state after
-  getEvent = () => {
-    Axios.get(
-      "https://dyhm3xstr8.execute-api.us-east-2.amazonaws.com/dev/events/get",
-      { headers: { Authorization: "c31912bb-0b58-42d1-a9a0-c521ecc98cdf" } }
-    )
-      .then(response => {
-        this.renameEvents(response);
-      })
-      .catch(this.onResopnseFail);
-  };
+  /**
+   * func to get data
+   */
+  async getData() {
+    const eventsResponse = await this.getEvents();
+    const invitesResponse = await this.getInvites();
+    // Get data from response
+    const events = eventsResponse.data
+    const invites = invitesResponse.data
+    // Combine into a collection of all calendar events
+    const allData = [...events, ...invites]
+
+    // Pass data to rename, sort, remove duplicates
+    this.schedule(allData)
+  }
+
+  /**
+   * func to re-schedule, etc
+   * takes single list of events/invites
+   */
+  schedule = allData => {};
 
   /**
    * Take response and rename event params
@@ -100,17 +107,17 @@ class App extends Component {
      */
 
     // First check business hours
-    this.checkBusinessHours(data)
+    this.checkBusinessHours(data);
 
     console.log("validate event function: ", data);
     return data;
   };
 
   checkBusinessHours = data => {
-    const withinWorkHours = checkHours(data)
-    console.log(withinWorkHours)
-    return withinWorkHours
-  }
+    const withinWorkHours = checkHours(data);
+    console.log(withinWorkHours);
+    return withinWorkHours;
+  };
 
   onResponseFail = () => {};
 
@@ -132,6 +139,27 @@ class App extends Component {
   gotoPast = () => {
     let calendarApi = this.calendarComponentRef.current.getApi();
     calendarApi.gotoDate("2010-01-01");
+  };
+
+    /**
+   * Get requests for the API using axios
+   * Returns response
+   */
+  getEvents = async () => {
+    return Axios.get(
+      "https://dyhm3xstr8.execute-api.us-east-2.amazonaws.com/dev/events/get",
+      { headers: { Authorization: "c31912bb-0b58-42d1-a9a0-c521ecc98cdf" } }
+    ).then(response => {
+      return response;
+    });
+  };
+  getInvites = async () => {
+    return Axios.get(
+      "https://dyhm3xstr8.execute-api.us-east-2.amazonaws.com/dev/invites/get",
+      { headers: { Authorization: "c31912bb-0b58-42d1-a9a0-c521ecc98cdf" } }
+    ).then(response => {
+      return response;
+    });
   };
 
   render() {
