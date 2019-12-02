@@ -1,5 +1,6 @@
 /**
  * Sort all objects by the start date parameter.
+ * Need to do so by turning date strings in paremeters into Date() objs
  * @param {*} items 
  */
 export function sortObjects(items) {
