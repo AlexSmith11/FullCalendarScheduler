@@ -6,9 +6,10 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import "./main.scss";
 import Axios from "axios";
 import { formatParamNames } from "./utils/formatParamNames.js";
-import { removeDuplicates } from "./utils/removeDuplicates.js";
-import { sortObjects } from "./utils/sortObjects.js";
+import { eventTime } from "./utils/eventTime.js";
+import { sortEvents } from "./utils/sortEvents.js";
 import { checkHours } from "./utils/checkHours.js";
+import { eventsMatch } from "./utils/eventsMatch.js";
 
 /**
  * Notes:
@@ -20,9 +21,7 @@ class App extends Component {
 
   state = {
     weekends: false,
-    calendarEvents: [],
-    sortedEvents: [],
-    sortedInvites: []
+    calendarEvents: []
   };
 
   componentDidMount() {
@@ -30,89 +29,87 @@ class App extends Component {
   }
 
   /**
-   * func to get data
+   * main func to get data
    */
   async getData() {
     const eventsResponse = await this.getEvents();
     const invitesResponse = await this.getInvites();
-    // Get data from response
-    const events = eventsResponse.data
-    const invites = invitesResponse.data
+    const events = eventsResponse.data;
+    const invites = invitesResponse.data;
+
+    // Need to rename param names so calendar can display events properly
+    const renamedEvents = formatParamNames(events);
+    const renamedInvites = formatParamNames(invites);
+
+    // Set events to be the prefered data - dont overwrite with invites
+    const eventsPreferred = renamedEvents.map(pr => ({
+      ...pr,
+      preferred: true
+    }));
+
     // Combine into a collection of all calendar events
-    const allData = [...events, ...invites]
+    const allEvents = [...eventsPreferred, ...renamedInvites];
+
+    // Sort events
+    const sortedEvents = sortEvents(allEvents);
 
     // Pass data to rename, sort, remove duplicates
-    this.schedule(allData)
+    this.schedule(sortedEvents);
   }
 
   /**
-   * func to re-schedule, etc
+   * func to re-schedule:
+   * Sorts, removes duplicates, schedules
    * takes single list of events/invites
+   * scheduling via for loop over all data manipulation per event ensures least
+   * time complexity
    */
-  schedule = allData => {};
+  schedule = events => {
+    for (let i = 0; i < events.length; i++) {
+      // When first event in array, stop
+      if (i === 0) {
+        continue;
+      }
 
-  /**
-   * Take response and rename event params
-   */
-  renameEvents = ({ data }) => {
-    const formattedEvents = formatParamNames(data);
+      // Get the duration of an event
+      const lastEvent = events[i - 1];
+      const currentEvent = events[i];
+      const overlappingTime = eventTime(lastEvent, currentEvent);
+      if (overlappingTime > 0) {
+        // If there's no overlap with prev event, stop
+        continue;
+      } else if (overlappingTime == null) {
+        // If there are no events to compare to, stop
+        continue
+      }
 
-    // Now remove duplicates
-    this.removeDuplicateEvents(formattedEvents);
+      // Remove duplicate event on a match
+      if (eventsMatch(lastEvent, currentEvent)) {
+        events.splice(i, 1);
+        i -= 1;
+        continue;
+      }
+
+      // Move current event if it is an invite - leave if event
+      let moveCurrent = false;
+      if (
+        (lastEvent.preferred && !currentEvent.moved) ||
+        (lastEvent.preferred && !currentEvent.preferred) ||
+        (!lastEvent.preferred && !lastEvent.moved && currentEvent.moved)
+      ) {
+        moveCurrent = true;
+      }
+
+      if (moveCurrent) {
+        continue;
+      }
+    }
+
   };
 
   /**
-   * remove duplicates from the calendar
+   * Make sure events are within business hours
    */
-  removeDuplicateEvents = data => {
-    const removed = removeDuplicates(data);
-
-    // Now sort objects (sort after removal of dupes as sort will now be faster)
-    this.sortEventObjects(removed);
-  };
-
-  /**
-   * sort events
-   */
-  sortEventObjects = data => {
-    const sorted = sortObjects(data);
-    console.log(sorted);
-
-    // Add sorted events to Cal state
-    this.setState({
-      sortedEvents: [...this.state.sortedEvents, ...sorted]
-    });
-    this.addAllToCalendar();
-
-    // Now for the main bit: validation
-    this.validateEvents(sorted);
-  };
-
-  /**
-   * Validate the events with the ruleset provided
-   */
-  validateEvents = data => {
-    //   const [events] // initial array of events from API
-    //   const [invites] // initial array of invites from API
-    //   const [eventsCache] // removed events that clashed with other events
-    //   const [invitesCache] // removed invites that clashed with other invites
-    //   const eventIndex  // int to count place in event array we are at
-    //   const inviteindex // Same as above for inv
-    //   const [sortedEvents] // All events and invites sorted into one array
-
-    /**
-     * Want separate functions to: (?)
-     * First reschedule events with times after/before 5pm/9am
-     * Then reschedule events that clash
-     */
-
-    // First check business hours
-    this.checkBusinessHours(data);
-
-    console.log("validate event function: ", data);
-    return data;
-  };
-
   checkBusinessHours = data => {
     const withinWorkHours = checkHours(data);
     console.log(withinWorkHours);
@@ -141,7 +138,7 @@ class App extends Component {
     calendarApi.gotoDate("2010-01-01");
   };
 
-    /**
+  /**
    * Get requests for the API using axios
    * Returns response
    */
