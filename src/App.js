@@ -10,6 +10,7 @@ import { eventTime } from "./utils/eventTime.js";
 import { sortEvents } from "./utils/sortEvents.js";
 import { checkHours } from "./utils/checkHours.js";
 import { eventsMatch } from "./utils/eventsMatch.js";
+import { moveEvent } from "./utils/moveEvent.js";
 
 /**
  * Notes:
@@ -54,7 +55,8 @@ class App extends Component {
     const sortedEvents = sortEvents(allEvents);
 
     // Pass data to rename, sort, remove duplicates
-    this.schedule(sortedEvents);
+     const allCalendarEvents = this.schedule(sortedEvents);
+     console.log(allCalendarEvents)
   }
 
   /**
@@ -63,10 +65,11 @@ class App extends Component {
    * takes single list of events/invites
    * scheduling via for loop over all data manipulation per event ensures least
    * time complexity
+   * Will schedule so that all events are as close to their original time as possible. Some original 'events' may be rescheduled
    */
   schedule = events => {
     for (let i = 0; i < events.length; i++) {
-      // When first event in array, stop
+      // When first event in array, skip to next event
       if (i === 0) {
         continue;
       }
@@ -76,10 +79,10 @@ class App extends Component {
       const currentEvent = events[i];
       const overlappingTime = eventTime(lastEvent, currentEvent);
       if (overlappingTime > 0) {
-        // If there's no overlap with prev event, stop
+        // If there's no overlap with prev event, skip to next event
         continue;
       } else if (overlappingTime == null) {
-        // If there are no events to compare to, stop
+        // If there are no events to compare to, skip to next event
         continue
       }
 
@@ -89,22 +92,53 @@ class App extends Component {
         i -= 1;
         continue;
       }
+    
+
+
+      // Want to first schedule original events (if .preferred = true, call sort func? AND ONLY COMPARE TO OTHER .preferred = true)
+      // Then do invites (if .preferred = false, call sort func? Compare to all)
+
+      // if (node2(start) < node1(end)) {                                    // Loop over events -> true if the next node starts before current one ends
+      //   node1(end) - node2(start) = nodeConflictDiff                      // We reschedule for after the currrent node
+      //   node2(start) + nodeConflictDiff, node2(end) + nodeConflictDiff
+      // } else if (node2(start) = node1(end)) {                             // Loop over events -> true of next node starts as current one ends
+      //   Do nothing, already sorted
+      // } else if (node2(start) > node1(end)) {                             // Loop over events -> true if there is a space between current and next node
+      //   node2(start) - node1(end) = nodeDiff                      // This gets the time diff between events - need this for finding events that are the same length of time
+      //   // Now add events into the spare slots. Maybe:
+      //   insertIntoSpareTime(nodeDiff, node1(end), node2(start))   // Every time there is a spare time slot, try to find an event that will fit
+      // }
+
+      console.log(currentEvent.start, lastEvent.end)
+
+      // Use the time difference between events (or between the end of the previous and start of the current) to add to current time 
+      if (currentEvent.start < lastEvent.end) {
+        const eventTimeDiff = lastEvent.end - currentEvent.start
+      } else if (currentEvent.start > lastEvent.end) {
+        
+      } else if (currentEvent.start === lastEvent.end) {
+        continue
+      } 
+
+
+
+
+
 
       // Move current event if it is an invite - leave if event
-      let moveCurrent = false;
-      if (
-        (lastEvent.preferred && !currentEvent.moved) ||
-        (lastEvent.preferred && !currentEvent.preferred) ||
-        (!lastEvent.preferred && !lastEvent.moved && currentEvent.moved)
-      ) {
-        moveCurrent = true;
-      }
+      // let moveCurrent = false;
+      // if (
+      //   (lastEvent.preferred && !currentEvent.moved) ||
+      //   (lastEvent.preferred && !currentEvent.preferred) ||
+      //   (!lastEvent.preferred && !lastEvent.moved && currentEvent.moved)
+      // ) {
+      //   moveCurrent = true;
+      // }
 
-      if (moveCurrent) {
-        continue;
-      }
+      // if (moveCurrent) {
+      //   continue;
+      // }
     }
-
   };
 
   /**

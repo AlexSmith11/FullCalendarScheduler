@@ -56,7 +56,7 @@ Used a filter with map
 // Then sort
 just a simple sort via object start param
 
-// Then we start validation on event timings
+// Then we start rescheduling on event timings
 // This is for the individual event or invite arrays. Once gone through one of the conditions, add to main array. 
 if (node2(start) < node1(end)) {                                    // Loop over events -> true if the next node starts before current one ends
   node1(end) - node2(start) = nodeConflictDiff                      // We reschedule for after the currrent node
@@ -144,33 +144,38 @@ HAVE:
 
 
 TEST DATA:
-    var test = [
-      {
-        title: "Meeting with Marketing",
-        start: "2019-10-28 09:30:00",
-        end: "2019-10-28 10:30:00"
-      },
-      {
-        title: "Canidate Interview",
-        start: "2019-10-28 10:30:00",
-        end: "2019-10-28 12:00:00"
-      },
-      {
-        title: "Canidate Interview",
-        start: "2019-10-28 10:30:00",
-        end: "2019-10-28 12:00:00"
-      },
-      {
-        title: "Canidate Interview",
-        start: "2019-10-28 11:30:00",   // This isn't a duplicate
-        end: "2019-10-28 12:00:00"
-      },
-      {
-        title: "FDSE SCRUM",
-        start: "2019-10-30 14:15:00",
-        end: "2019-10-28 14:45:00"
-      }
-    ];
+      var test = [
+        {
+          title: "Meeting with Marketing",
+          start: "2019-10-28 09:30:00",
+          end: "2019-10-28 10:30:00"
+        },
+        {
+          title: "Canidate Interview",  // Clashes with 3
+          start: "2019-10-28 10:30:00",
+          end: "2019-10-28 12:00:00"
+        },
+        {
+          title: "Canidate Interview",  // Clashes with 2
+          start: "2019-10-28 10:30:00",
+          end: "2019-10-28 12:00:00"
+        },
+        {
+          title: "Canidate Interview 2",  // Time clashes with 2 & 3
+          start: "2019-10-28 10:30:00",
+          end: "2019-10-28 12:00:00"
+        },
+        {
+          title: "Canidate Interview",
+          start: "2019-10-28 11:30:00",   // This isn't a duplicate
+          end: "2019-10-28 12:00:00"
+        },
+        {
+          title: "FDSE SCRUM",
+          start: "2019-10-30 14:15:00",
+          end: "2019-10-28 14:45:00"
+        }
+      ];
 
 How to make this all better:
 Differentiate between the event and invite arrays. Append an empty obj to the end and scan for it?
