@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import moment from 'moment';
+
 
 import "./main.scss";
 import Axios from "axios";
@@ -55,8 +57,10 @@ class App extends Component {
     const sortedEvents = sortEvents(allEvents);
 
     // Pass data to rename, sort, remove duplicates
-     const allCalendarEvents = this.schedule(sortedEvents);
-     console.log(allCalendarEvents)
+    // Could take loop out from schedule() and into here, looping once for preferred (events) and again for invites
+    // Instead of having the if (preferred) inside the loop
+    const allCalendarEvents = this.schedule(sortedEvents);
+    console.log(allCalendarEvents)
   }
 
   /**
@@ -92,7 +96,9 @@ class App extends Component {
         i -= 1;
         continue;
       }
-    
+
+
+
 
 
       // Want to first schedule original events (if .preferred = true, call sort func? AND ONLY COMPARE TO OTHER .preferred = true)
@@ -109,16 +115,43 @@ class App extends Component {
       //   insertIntoSpareTime(nodeDiff, node1(end), node2(start))   // Every time there is a spare time slot, try to find an event that will fit
       // }
 
+      // Evertime there is a spare time slot, I can't re-schedule the events. Can only store the timeDiff
+      // And try to insert invites between already confirmed events.
       console.log(currentEvent.start, lastEvent.end)
 
+
+
+
+
+      var j = moment(lastEvent.end).diff(moment(currentEvent.start))
+      console.log(j)
+
+
+      //https://stackoverflow.com/questions/39980722/moment-js-get-current-time-in-milliseconds
+
+      var end = moment(lastEvent.end).valueOf()
+      console.log(end)
+
+      var start = moment(currentEvent.start).valueOf()
+      console.log(start)
+
+      var diff = moment(lastEvent.end).diff(moment(currentEvent.start)).valueOf()
+      console.log(diff)
+
+
       // Use the time difference between events (or between the end of the previous and start of the current) to add to current time 
-      if (currentEvent.start < lastEvent.end) {
-        const eventTimeDiff = lastEvent.end - currentEvent.start
-      } else if (currentEvent.start > lastEvent.end) {
-        
-      } else if (currentEvent.start === lastEvent.end) {
-        continue
-      } 
+      if (currentEvent.preferred) {
+        // If there's a space between events
+        if (diff > 0) {
+
+        // If there's negative space between events
+        } else if (diff > 0) {
+
+        // If there's no space between events
+        } else if (diff === 0) {
+          continue
+        }
+      }
 
 
 
@@ -150,7 +183,7 @@ class App extends Component {
     return withinWorkHours;
   };
 
-  onResponseFail = () => {};
+  onResponseFail = () => { };
 
   // Set the calendars state
   addAllToCalendar = () => {

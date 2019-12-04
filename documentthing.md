@@ -119,6 +119,7 @@ if(node1(end) > 17:00:00) {
   cachedNodeX concat or [...] or whatever. Add to cache.
   // Increment to next day
 }
+// OR make the event start at 9am the next day and sort from there
 
 insertIntoSpareTime(nodeDiff, node1(end), node2(start)) {               // This will try to insert cached events into free time slots.
   cachedNodeDiff = cachedNode1(start) - cachedNode(end)                 // Get the length of a cached node
