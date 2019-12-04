@@ -5,93 +5,158 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 
 import "./main.scss";
 import Axios from "axios";
+import { formatParamNames } from "./utils/formatParamNames.js";
+import { eventTime } from "./utils/eventTime.js";
+import { sortEvents } from "./utils/sortEvents.js";
+import { checkHours } from "./utils/checkHours.js";
+import { eventsMatch } from "./utils/eventsMatch.js";
+import { moveEvent } from "./utils/moveEvent.js";
 
+/**
+ * Notes:
+ * Add a toast when events have been added successfully!
+ * Create an ENV file to store API keys and addresses?
+ */
 class App extends Component {
   calendarComponentRef = React.createRef();
 
   state = {
     weekends: false,
-    calendarEvents: [
-      // initial event data (Remove on production - this is for testing)
-      {
-        // this object will be "parsed" into an Event Object
-        title: "The Title", // a property!
-        start: "2018-09-01", // a property!
-        end: "2018-09-02" // a property! ** see important note below about 'end' **
-      },
-      {
-        name: "Meeting with Marketing",
-        startTime: "2019-11-27",
-        endTime: "2019-11-27"
-      },
-      {
-        title: "erik test",
-        startTime: "09:30",
-        endTime: "10:30"
-      },
-      {
-        title: "test 2",
-        start: "2019-11-29 10:30:00"
-      }
-    ]
+    calendarEvents: []
   };
-  // Do I wanna do this..?
-  // https://stackoverflow.com/questions/51125456/how-to-rename-object-data-response-in-react
-  // What I get: https://fullcalendar.io/docs/duration-object, https://fullcalendar.io/docs/recurring-events
-  // What I want: https://fullcalendar.io/docs/date-parsing
 
   componentDidMount() {
-    this.getEvent();
+    this.getData();
   }
 
-  // JSON Stream for EVENTS
-  // Use Axios http request handler to GET req the API...
-  // Then add events to the state.
-  // Use seperate function to validate?
-  // Add a toast when events have been added successfully!
-  // Create an ENV file to store API keys and addresses?
-  // Use await/async to prevent load before GET returned (when using hooks)
-  getEvent = () => {
-    Axios.get(
-      "https://dyhm3xstr8.execute-api.us-east-2.amazonaws.com/dev/events/get",
-      {
-        headers: { Authorization: "c31912bb-0b58-42d1-a9a0-c521ecc98cdf" }
+  /**
+   * main func to get data
+   */
+  async getData() {
+    const eventsResponse = await this.getEvents();
+    const invitesResponse = await this.getInvites();
+    const events = eventsResponse.data;
+    const invites = invitesResponse.data;
+
+    // Need to rename param names so calendar can display events properly
+    const renamedEvents = formatParamNames(events);
+    const renamedInvites = formatParamNames(invites);
+
+    // Set events to be the prefered data - dont overwrite with invites
+    const eventsPreferred = renamedEvents.map(pr => ({
+      ...pr,
+      preferred: true
+    }));
+
+    // Combine into a collection of all calendar events
+    const allEvents = [...eventsPreferred, ...renamedInvites];
+
+    // Sort events
+    const sortedEvents = sortEvents(allEvents);
+
+    // Pass data to rename, sort, remove duplicates
+     const allCalendarEvents = this.schedule(sortedEvents);
+     console.log(allCalendarEvents)
+  }
+
+  /**
+   * func to re-schedule:
+   * Sorts, removes duplicates, schedules
+   * takes single list of events/invites
+   * scheduling via for loop over all data manipulation per event ensures least
+   * time complexity
+   * Will schedule so that all events are as close to their original time as possible. Some original 'events' may be rescheduled
+   */
+  schedule = events => {
+    for (let i = 0; i < events.length; i++) {
+      // When first event in array, skip to next event
+      if (i === 0) {
+        continue;
       }
-    ).then(response => {
-      if (response.status === 200 && response != null) {
-        var events = response.data;
-        this.setState({
-          // Add events to the API via spread operator - preserves original state (immutability and all that).
-          calendarEvents: [...this.state.calendarEvents, ...events]
-        });
-      } else {
-        throw new Error("Something's wrong - Check your API feed or server");
+
+      // Get the duration of an event
+      const lastEvent = events[i - 1];
+      const currentEvent = events[i];
+      const overlappingTime = eventTime(lastEvent, currentEvent);
+      if (overlappingTime > 0) {
+        // If there's no overlap with prev event, skip to next event
+        continue;
+      } else if (overlappingTime == null) {
+        // If there are no events to compare to, skip to next event
+        continue
       }
 
+      // Remove duplicate event on a match
+      if (eventsMatch(lastEvent, currentEvent)) {
+        events.splice(i, 1);
+        i -= 1;
+        continue;
+      }
+    
 
-      this.validateEvents(events);
+
+      // Want to first schedule original events (if .preferred = true, call sort func? AND ONLY COMPARE TO OTHER .preferred = true)
+      // Then do invites (if .preferred = false, call sort func? Compare to all)
+
+      // if (node2(start) < node1(end)) {                                    // Loop over events -> true if the next node starts before current one ends
+      //   node1(end) - node2(start) = nodeConflictDiff                      // We reschedule for after the currrent node
+      //   node2(start) + nodeConflictDiff, node2(end) + nodeConflictDiff
+      // } else if (node2(start) = node1(end)) {                             // Loop over events -> true of next node starts as current one ends
+      //   Do nothing, already sorted
+      // } else if (node2(start) > node1(end)) {                             // Loop over events -> true if there is a space between current and next node
+      //   node2(start) - node1(end) = nodeDiff                      // This gets the time diff between events - need this for finding events that are the same length of time
+      //   // Now add events into the spare slots. Maybe:
+      //   insertIntoSpareTime(nodeDiff, node1(end), node2(start))   // Every time there is a spare time slot, try to find an event that will fit
+      // }
+
+      console.log(currentEvent.start, lastEvent.end)
+
+      // Use the time difference between events (or between the end of the previous and start of the current) to add to current time 
+      if (currentEvent.start < lastEvent.end) {
+        const eventTimeDiff = lastEvent.end - currentEvent.start
+      } else if (currentEvent.start > lastEvent.end) {
+        
+      } else if (currentEvent.start === lastEvent.end) {
+        continue
+      } 
 
 
-      console.log("calendar state: ", this.state.calendarEvents);
 
-    });
+
+
+
+      // Move current event if it is an invite - leave if event
+      // let moveCurrent = false;
+      // if (
+      //   (lastEvent.preferred && !currentEvent.moved) ||
+      //   (lastEvent.preferred && !currentEvent.preferred) ||
+      //   (!lastEvent.preferred && !lastEvent.moved && currentEvent.moved)
+      // ) {
+      //   moveCurrent = true;
+      // }
+
+      // if (moveCurrent) {
+      //   continue;
+      // }
+    }
   };
 
+  /**
+   * Make sure events are within business hours
+   */
+  checkBusinessHours = data => {
+    const withinWorkHours = checkHours(data);
+    console.log(withinWorkHours);
+    return withinWorkHours;
+  };
 
-  /**Validate the events with the ruleset provided
-  */
-  validateEvents = allEvents => {
-    const [events] // initial array of events from API
-    const [invites] // initial array of invites from API
-    const [eventsCache] // removed events that clashed with other events
-    const [invitesCache] // removed invites that clashed with other invites
-    const eventIndex  // int to count place in event array we are at
-    const inviteindex // Same as above for inv
-    const [sortedEvents] // All events and invites sorted into one array
+  onResponseFail = () => {};
 
-
-    console.log("validate event function: ", allEvents);
-    return allEvents;
+  // Set the calendars state
+  addAllToCalendar = () => {
+    this.setState({
+      calendarEvents: this.state.sortedEvents
+    });
   };
 
   toggleWeekends = () => {
@@ -101,10 +166,31 @@ class App extends Component {
     });
   };
 
-  // Set calendar start date
+  // Set calendar 'start' date
   gotoPast = () => {
     let calendarApi = this.calendarComponentRef.current.getApi();
     calendarApi.gotoDate("2010-01-01");
+  };
+
+  /**
+   * Get requests for the API using axios
+   * Returns response
+   */
+  getEvents = async () => {
+    return Axios.get(
+      "https://dyhm3xstr8.execute-api.us-east-2.amazonaws.com/dev/events/get",
+      { headers: { Authorization: "c31912bb-0b58-42d1-a9a0-c521ecc98cdf" } }
+    ).then(response => {
+      return response;
+    });
+  };
+  getInvites = async () => {
+    return Axios.get(
+      "https://dyhm3xstr8.execute-api.us-east-2.amazonaws.com/dev/invites/get",
+      { headers: { Authorization: "c31912bb-0b58-42d1-a9a0-c521ecc98cdf" } }
+    ).then(response => {
+      return response;
+    });
   };
 
   render() {
@@ -137,18 +223,12 @@ class App extends Component {
   }
 }
 
-// function App() {
-
-//   return (
-//     <FullCalendar
-//       plugins={[timeGridPlugin]}
-//       weekends={false}
-//       allDaySlot={false}
-//       height="parent"
-//       events='https://fullcalendar.io/demo-events.json'
-//     />
-//   );
-// }
+// Calendar Params:
+//  plugins={[timeGridPlugin]}
+//  weekends={false}
+//  allDaySlot={false}
+//  height="parent"
+//  events='https://fullcalendar.io/demo-events.json'
 
 // Also have: dateClick={this.handleDateClick}
 
