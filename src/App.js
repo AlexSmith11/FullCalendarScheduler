@@ -2,8 +2,7 @@ import React, { Component } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import moment from 'moment';
-
+import moment from "moment";
 
 import "./main.scss";
 import Axios from "axios";
@@ -11,13 +10,14 @@ import { formatParamNames } from "./utils/formatParamNames.js";
 import { eventTime } from "./utils/eventTime.js";
 import { sortEvents } from "./utils/sortEvents.js";
 import { checkHours } from "./utils/checkHours.js";
-import { eventsMatch } from "./utils/eventsMatch.js";
+// import { eventsMatch } from "./utils/eventsMatch.js";
 import { moveEvent } from "./utils/moveEvent.js";
 
 /**
  * Notes:
  * Add a toast when events have been added successfully!
  * Create an ENV file to store API keys and addresses?
+ * Warning: moment.js is deprecating .valueOf(). Falls back to Date(). May be differences across browsers
  */
 class App extends Component {
   calendarComponentRef = React.createRef();
@@ -53,45 +53,13 @@ class App extends Component {
     // Combine into a collection of all calendar events
     const allEvents = [...eventsPreferred, ...renamedInvites];
 
-    // Need to check hours are between 9-5 before sorting
-    const eventsInWorkHours = this.workHours(allEvents)
-
     // Sort events
-    const sortedEvents = sortEvents(eventsInWorkHours);
+    const sortedEvents = sortEvents(allEvents);
 
-    // Pass data to rename, sort, remove duplicates
     // Could take loop out from schedule() and into here, looping once for preferred (events) and again for invites
     // Instead of having the if (preferred) inside the loop
     const allCalendarEvents = this.schedule(sortedEvents);
-    console.log(allCalendarEvents)
-  }
-
-  // Problem: By doing this, we double the total length of time we use to output events list.
-  // What about putting it in the schedule loop?
-  // Make sure events are within work hours. If not, re-schedule
-  workHours = (events) => {
-    for (let i = 0; i < events.length; i++) {
-
-      const currentEvent = events[i];
-
-      var end = moment(lastEvent.end).valueOf()
-      console.log(end)
-
-      var start = moment(currentEvent.start).valueOf()
-      console.log(start)
-
-      var diff = moment(lastEvent.end).diff(moment(currentEvent.start)).valueOf()
-
-      // Check event isn't ending after 5pm first and send to next day if so (can use moment().add(1, day)) and set time to 9am
-      // Something like:
-      if (moment(currentEvent.end).isAfter('17:00:00')) {
-        currentEvent.start = moment(currentEvent.start).add(1, day) // and then make start = 9am, end = 9am + diff
-        currentEvent.end = moment(currentEvent.end).add(1, day)
-      } else if (moment(currentEvent.start).isBefore('9:00:00')) {
-
-      }
-    }
-    return events
+    console.log(allCalendarEvents);
   }
 
   /**
@@ -118,16 +86,15 @@ class App extends Component {
         continue;
       } else if (overlappingTime == null) {
         // If there are no events to compare to, skip to next event
-        continue
-      }
-
-      // Remove duplicate event on a match
-      if (eventsMatch(lastEvent, currentEvent)) {
-        events.splice(i, 1);
-        i -= 1;
         continue;
       }
 
+      // Remove duplicate event on a match
+      // if (eventsMatch(lastEvent, currentEvent)) {
+      //   events.splice(i, 1);
+      //   i -= 1;
+      //   continue;
+      // }
 
       // Want to first schedule original events (if .preferred = true, call sort func? AND ONLY COMPARE TO OTHER .preferred = true)
       // Then do invites (if .preferred = false, call sort func? Compare to all)
@@ -145,42 +112,43 @@ class App extends Component {
 
       // Evertime there is a spare time slot, I can't re-schedule the events. Can only store the timeDiff
       // And try to insert invites between already confirmed events.
-      console.log(currentEvent.start, lastEvent.end)
+      console.log(currentEvent.start, lastEvent.end);
 
-
-      var j = moment(lastEvent.end).diff(moment(currentEvent.start))
-      console.log(j)
-
+      var j = moment(lastEvent.end).diff(moment(currentEvent.start));
+      console.log(j);
+      var end = moment(lastEvent.end).valueOf();
+      console.log(end);
+      var start = moment(currentEvent.start).valueOf();
+      console.log(start);
 
       //https://stackoverflow.com/questions/39980722/moment-js-get-current-time-in-milliseconds
+      var diffBetweenEvents = moment(lastEvent.end)
+        .diff(moment(currentEvent.start))
+        .valueOf();
+      console.log(diffBetweenEvents);
 
-      var end = moment(lastEvent.end).valueOf()
-      console.log(end)
+      console.log(currentEvent.end)
+      currentEvent.end = moment(currentEvent.end).add(1, 'd');
+      console.log(currentEvent)
 
-      var start = moment(currentEvent.start).valueOf()
-      console.log(start)
+      // Make sure events are within work hours. If not, re-schedule
+      // Check event isn't ending after 5pm first, and then send to next day at 9am if it is (can use moment().add(1, day))
+      if (moment(currentEvent.end).isAfter("17:00:00")) {
+        currentEvent.start = moment(currentEvent.start).add(1, 'd'); // and then make start = 9am, end = 9am + diff
+        currentEvent.end = moment(currentEvent.end).add(1, 'd');
+      } else if (moment(currentEvent.start).isBefore("9:00:00")) {
+        // Set time to 9am + 
+      }
 
-      var diff = moment(lastEvent.end).diff(moment(currentEvent.start)).valueOf()
-      console.log(diff)
-
-
-
-
-      // Use the time difference between events (or between the end of the previous and start of the current) to add to current time 
+      // Use the time difference between events (or between the end of the previous and start of the current) to add to current time
       if (currentEvent.preferred) {
         // If there's a space between events:
-        if (diff > 0) {
+        if (diffBetweenEvents > 0) {
           // Store diff to compare to len of invites. Store start/end of diff (aka end of prev, start of current)
-
           // If there's negative space between events:
-        } else if (diff > 0) {
+        } else if (diffBetweenEvents > 0) {
           // Add diff to the start/end of the current objects time
         }
-
-
-
-
-
 
         // Move current event if it is an invite - leave if event
         // let moveCurrent = false;
@@ -196,8 +164,8 @@ class App extends Component {
         //   continue;
         // }
       }
-    };
-  }
+    }
+  };
 
   /**
    * Make sure events are within business hours
@@ -208,7 +176,7 @@ class App extends Component {
     return withinWorkHours;
   };
 
-  onResponseFail = () => { };
+  onResponseFail = () => {};
 
   // Set the calendars state
   addAllToCalendar = () => {
