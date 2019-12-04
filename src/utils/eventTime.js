@@ -1,5 +1,6 @@
 /**
  * Return time in millis of duration of event overlap
+ * Attempt to avoid using moment(because it uses 42kb). 
  * If pos, no overlap
  * @param {*} items
  */

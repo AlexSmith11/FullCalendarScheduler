@@ -53,14 +53,45 @@ class App extends Component {
     // Combine into a collection of all calendar events
     const allEvents = [...eventsPreferred, ...renamedInvites];
 
+    // Need to check hours are between 9-5 before sorting
+    const eventsInWorkHours = this.workHours(allEvents)
+
     // Sort events
-    const sortedEvents = sortEvents(allEvents);
+    const sortedEvents = sortEvents(eventsInWorkHours);
 
     // Pass data to rename, sort, remove duplicates
     // Could take loop out from schedule() and into here, looping once for preferred (events) and again for invites
     // Instead of having the if (preferred) inside the loop
     const allCalendarEvents = this.schedule(sortedEvents);
     console.log(allCalendarEvents)
+  }
+
+  // Problem: By doing this, we double the total length of time we use to output events list.
+  // What about putting it in the schedule loop?
+  // Make sure events are within work hours. If not, re-schedule
+  workHours = (events) => {
+    for (let i = 0; i < events.length; i++) {
+
+      const currentEvent = events[i];
+
+      var end = moment(lastEvent.end).valueOf()
+      console.log(end)
+
+      var start = moment(currentEvent.start).valueOf()
+      console.log(start)
+
+      var diff = moment(lastEvent.end).diff(moment(currentEvent.start)).valueOf()
+
+      // Check event isn't ending after 5pm first and send to next day if so (can use moment().add(1, day)) and set time to 9am
+      // Something like:
+      if (moment(currentEvent.end).isAfter('17:00:00')) {
+        currentEvent.start = moment(currentEvent.start).add(1, day) // and then make start = 9am, end = 9am + diff
+        currentEvent.end = moment(currentEvent.end).add(1, day)
+      } else if (moment(currentEvent.start).isBefore('9:00:00')) {
+
+      }
+    }
+    return events
   }
 
   /**
@@ -98,9 +129,6 @@ class App extends Component {
       }
 
 
-
-
-
       // Want to first schedule original events (if .preferred = true, call sort func? AND ONLY COMPARE TO OTHER .preferred = true)
       // Then do invites (if .preferred = false, call sort func? Compare to all)
 
@@ -120,9 +148,6 @@ class App extends Component {
       console.log(currentEvent.start, lastEvent.end)
 
 
-
-
-
       var j = moment(lastEvent.end).diff(moment(currentEvent.start))
       console.log(j)
 
@@ -139,40 +164,40 @@ class App extends Component {
       console.log(diff)
 
 
+
+
       // Use the time difference between events (or between the end of the previous and start of the current) to add to current time 
       if (currentEvent.preferred) {
-        // If there's a space between events
+        // If there's a space between events:
         if (diff > 0) {
+          // Store diff to compare to len of invites. Store start/end of diff (aka end of prev, start of current)
 
-        // If there's negative space between events
+          // If there's negative space between events:
         } else if (diff > 0) {
-
-        // If there's no space between events
-        } else if (diff === 0) {
-          continue
+          // Add diff to the start/end of the current objects time
         }
+
+
+
+
+
+
+        // Move current event if it is an invite - leave if event
+        // let moveCurrent = false;
+        // if (
+        //   (lastEvent.preferred && !currentEvent.moved) ||
+        //   (lastEvent.preferred && !currentEvent.preferred) ||
+        //   (!lastEvent.preferred && !lastEvent.moved && currentEvent.moved)
+        // ) {
+        //   moveCurrent = true;
+        // }
+
+        // if (moveCurrent) {
+        //   continue;
+        // }
       }
-
-
-
-
-
-
-      // Move current event if it is an invite - leave if event
-      // let moveCurrent = false;
-      // if (
-      //   (lastEvent.preferred && !currentEvent.moved) ||
-      //   (lastEvent.preferred && !currentEvent.preferred) ||
-      //   (!lastEvent.preferred && !lastEvent.moved && currentEvent.moved)
-      // ) {
-      //   moveCurrent = true;
-      // }
-
-      // if (moveCurrent) {
-      //   continue;
-      // }
-    }
-  };
+    };
+  }
 
   /**
    * Make sure events are within business hours
