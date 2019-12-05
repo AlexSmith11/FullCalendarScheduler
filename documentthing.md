@@ -1,78 +1,20 @@
 Deconstructing props
 react cloneElement
-<!-- 
-Process:
-1# Remove duplicates
-2# reschedule events that are outside of work hours (Go over invites (for loop) & check if time is free or not. if free add to event list.)
-	- external list of unused events
-3# add possible invites to time slots
-	- external list of unsused invites
-4# fill in unused events
-5# fill in unused invites
- -->
-
-SO (summary):
-<!-- 
-process:
--Remove duplicates
--Sort events array and inv array according to date and time
--main algo
-  -Push overlapping events to a latter time
-  -Do nothing for back-to-back events
-  -Store time differences between events
-  -
--if event is after 5pm add to eventCache. Seperate caches as we will merge events back into main array before invites
--End up with two arrays. Events and Invites. These have no clashing nodes with time spaces between events.
--First loop through eventCache to merge events back in.
-
-
-- Main algorithm:
-   This will sort events into the main array by comparing times
-   - events will be merged into main first as these have been confirmed
-   - 
-- Once main array finalised, display events -->
 
 
 
+Plan (5th Dec):
+Need to find times where there are free slots/gaps
+Need to then change the times of invites to fit into the slots/gaps
 
-remove duplicates
-
-remove clashes - add to seperate array
-Sort arrays by start time
-	go through both main eve, inv lists linearly:
-	(two lists. one with events the other with invites)
-		Need one for each (eve, inv) because we will first re-schedule these events, then invs:
-
-		    const [events] // initial array of events from API (after duplicates have been removed)
-    		const [invites] // initial array of invites from API (after duplicates have been removed)
-    		const [eventsCache] // removed events that clashed with other events
-    		const [invitesCache] // removed invites that clashed with other invites
-
-			take first node in [events] and check if next event clashes (compare end time with next nodes start time)
-				if it doesn't, add this to MAIN (final) array
-
-	Look up quick sort. modify it to use both start and end times.
-		Take original event array, sort into cache/back into main array?
-		Add condition in quick sort that: if time clash, add the clashing obj (both eve and inv) to seperate array.
-		sort this second array
-		append this array back onto main array.
-		https://www.sitepoint.com/sort-an-array-of-objects-in-javascript/
-		https://stackoverflow.com/questions/46052484/order-events-in-fullcalendar-by-start-date-and-end-date
-		https://stackoverflow.com/questions/10153846/sorting-an-array-of-objects-by-two-properties
-
-		sort by start time -> 
-
-		OR (once sorted by start time):
-		Node#1 end - start = Node#1_diff
-		Add Node#1_diff to Node#2 start & end
-		Repeat:
-		Node#2 end - start = Node#2_diff
-		Add Node#2_diff to Node#3 start & end
-		Repeat:
-			Until:
-			Node#n end >= 17:00:00 (5pm)
-			Then: next day
-
+Best way maybe: (?)
+- Get timestamps of start/end & length of gap
+- DONT want to match length, might skip the first 100 invites to find one that fits perfectly
+- So, have objs of start, end, duration of gap.
+  - if inv len < duration, set inv to start (of duration). End = start + diff.
+    - ALSO set the duration obj's start to the now rescheduled inv's end.
+  - if duration end = duration start, or are within 5 minutes of each other, delete the object
+  - if duration deleted, next duration. next inv.
 
 
 

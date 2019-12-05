@@ -42,15 +42,16 @@ class AppMK2 extends Component {
       calendarEvents: renamedEvents
     });
 
-    const readyForCalendarInvites = this.findTime(renamedEvents);
-    console.log(readyForCalendarInvites);
+    const timeGaps = this.schedule(renamedEvents);
 
-    // Run sort once more to make sure events are in right order
+    const readyForCalendarInvites = this.schedule(sortedInvites, timeGaps);
+
+    // scratch that, DONT sort again, no point. calendar doesn't care about array order, dummy.
     // Then set to calendar state
   }
 
-  // One loop for finding time gaps
-  findTime = events => {
+  // One loop for finding time gaps between events
+  findGap = events => {
     for (let i = 0; i < events.length; i++) {
       // When first event in array, skip to next event
       if (i === 0) {
@@ -63,16 +64,16 @@ class AppMK2 extends Component {
       // When there is no spare time between events
       const overlappingTime = eventTime(lastEvent, currentEvent);
       if (overlappingTime === 0) {
-        // If there's no overlap with prev event, skip to next event.
+        // If there's no overlap with prev event, skip to next event. There's never any clashing between events.
         continue;
       }
 
 			// When there is spare time between events get the times (start and end)
-			if (overlappingTime !== 0) {
-
+			if (overlappingTime !== 0) {  // Dont need this if statement lol, just here for visualising
+        // Add to array of 'gap' objects, with each obj having a start, end and duration?
 			}
 
-      // tmp - assign each time gap to state array
+      // temp - assign each time gap to array
       const gap = 1;
       const timeGaps = [...gap];
       return timeGaps;
@@ -98,7 +99,14 @@ class AppMK2 extends Component {
         continue;
       }
 
-      // Assign invites to time gaps - make sure they are not assigned outside of hours - then assign to state
+      // Make sure invites aren't out of work hours. If they are, reassign
+      // Wrong way to do this. Just instead have a condition in the function below that blocks assignment before 9, after 5
+
+      
+      // Assign invites to time gaps 
+      // before assigning/changing the invites data, do a check to see if what it is about to be changed to is after 5/ before 9. 
+
+      //then assign to state
     }
   };
 
