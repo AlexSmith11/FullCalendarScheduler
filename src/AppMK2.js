@@ -63,13 +63,13 @@ class AppMK2 extends Component {
       const lastEvent = events[i - 1];
       const currentEvent = events[i];
 
+      const gapDuration = eventTime(lastEvent, currentEvent);
+
       // When there is no spare time between events
       if (gapDuration === 0) {
         // If there's no overlap with prev event, skip to next event. There's never any clashing between events.
         continue;
       }
-
-      const gapDuration = eventTime(lastEvent, currentEvent);
 
       // Check this - would it help simplify this
       // https://stackoverflow.com/questions/15130735/how-can-i-remove-time-from-date-with-moment-js
@@ -104,7 +104,7 @@ class AppMK2 extends Component {
       timeGaps.push({
         id: i,
         startGapDuration: startOfDuration,
-        endGapDuration: endOfDuration,     // OR 5PM
+        endGapDuration: endOfDuration,
         gapDuration: gapDuration
       })
     }
@@ -119,6 +119,7 @@ class AppMK2 extends Component {
   // If you can't fit one in the week, rollover?
   // There needs to be nested loop to check for gaps and more 'cleverly' assign invites to times (rather than just put them all at the end of the array)
   // time complexity is O(n^2) :c cant use hashes as we aren't using direct comparisons. Also can't use JSON stringify to compare.
+  // Currently, complexity is O(n) + O(n^2) >:/
   schedule = (invites, timeGaps) => {
     for (let i = 0; i < invites.length; i++) {
 
@@ -139,8 +140,18 @@ class AppMK2 extends Component {
       // invites.forEach(timeGaps) { if(timeGaps[i] != null* && ...){continue;} }
       // *Need this - some iterations wont have gaps, so id's will be like: [2, 3, 5, 7, 8, 9, 11...]
 
+      // Do I need a forEach?
+      // https://stackoverflow.com/questions/41603036/get-the-index-of-the-first-element-in-an-array-with-value-greater-than-x
+      // So:
+      /**
+       * Find first index where invDur is smaller than (so can fit inside of) the gapDuration
+       * var index = timeGaps.findIndex(inviteDuration => inviteDuration < gapDuration);
+       * Then assign vals:
+       */
 
       timeGaps.forEach(element => {
+        // Is this the wrong way - loop over gaps or invites first?
+        // Need to find first timeGap that has large enough duration for an invite to fit, then assign values.
       });
     }
   };
