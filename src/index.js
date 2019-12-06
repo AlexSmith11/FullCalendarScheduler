@@ -10,7 +10,7 @@ import * as serviceWorker from "./serviceWorker";
  * Conflict sorter between dates already scheduled and invites to events that are not (yet).
  */
 
-ReactDOM.render(<AppMK2 />, document.getElementById("root"));
+ReactDOM.render(<App />, document.getElementById("root"));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
