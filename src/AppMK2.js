@@ -42,7 +42,9 @@ class AppMK2 extends Component {
       calendarEvents: renamedEvents
     });
 
-    const timeGaps = this.schedule(renamedEvents);
+    const timeGaps = this.findGap(renamedEvents);
+    console.log('time gaps: ', timeGaps)
+
 
     const readyForCalendarInvites = this.schedule(sortedInvites, timeGaps);
 
@@ -52,6 +54,7 @@ class AppMK2 extends Component {
 
   // One loop for finding time gaps between events
   findGap = events => {
+    const timeGaps = [];
     for (let i = 0; i < events.length; i++) {
       // When first event in array, skip to next event
       if (i === 0) {
@@ -62,22 +65,22 @@ class AppMK2 extends Component {
       const currentEvent = events[i];
 
       // When there is no spare time between events
-      const overlappingTime = eventTime(lastEvent, currentEvent);
-      if (overlappingTime === 0) {
+      const gapDuration = eventTime(lastEvent, currentEvent);
+      if (gapDuration === 0) {
         // If there's no overlap with prev event, skip to next event. There's never any clashing between events.
         continue;
       }
 
 			// When there is spare time between events get the times (start and end)
-			if (overlappingTime !== 0) {  // Dont need this if statement lol, just here for visualising
-        // Add to array of 'gap' objects, with each obj having a start, end and duration?
-			}
-
-      // temp - assign each time gap to array
-      const gap = 1;
-      const timeGaps = [...gap];
-      return timeGaps;
+      // Add to array of 'gap' objects, with each obj having a start, end and duration?
+      timeGaps.push({
+        id: i,
+        startGapDuration: lastEvent.end,
+        endGapDuration: currentEvent.start,
+        gapDuration: gapDuration
+      })      
     }
+    return timeGaps;
   };
 
 	// one loop for re-assigning invites to times throughout either the same day or if not, that week.
