@@ -1,7 +1,6 @@
 import moment from "moment";
 
 import { eventTime } from "./eventTime.js";
-import { createDuration } from "./createDuration.js";
 
 /**
  * One loop for finding time gaps between events
@@ -24,9 +23,9 @@ export function findDuration(events) {
 
     // If there are no more events, set it to arbitrary point in future, so we can have a certain amount of time free to assign invites
     // This is terrifically terrible, I'm so sorry
-    if (currentEvent === null) {
-      currentEvent.start = "2030-01-01 09:00:00";
-    }
+    // if (currentEvent === null) {
+    //   currentEvent.start = "2030-01-01 09:00:00";
+    // }
 
     // When there is no spare time between events
     if (gapDuration === 0) {
@@ -34,68 +33,149 @@ export function findDuration(events) {
       continue;
     }
 
+    console.log(events)
+
     // Then check if within work hours
-    let startOfDuration = moment(lastEvent.end);
-    let endOfDuration = moment(currentEvent.start);
-    let startDurationMillis = moment(lastEvent.end).valueOf();
-    let endOfDurationMillis = moment(currentEvent.start).valueOf();
-    let startOfWorkDay = moment(lastEvent.end)
+    const startOfDuration = moment(lastEvent.end);
+    const endOfDuration = moment(currentEvent.start);
+    const startDurationMillis = moment(lastEvent.end).valueOf();
+    const endOfDurationMillis = moment(currentEvent.start).valueOf();
+    const startOfWorkDay = moment(lastEvent.end)
       .set("hour", 9)
       .set("minute", 0)
       .set("second", 0);
-    let endOfWorkDay = moment(currentEvent.start)
+    const endOfWorkDay = moment(currentEvent.start)
       .set("hour", 17)
       .set("minute", 0)
       .set("second", 0);
-
-    // Need to make sure durations end at the end of the work day
-    // checks if end is after 5pm
-    if (endOfDurationMillis > endOfWorkDay.valueOf()) {
-      endOfDuration = endOfWorkDay;
-    }
-    // Checks if start before 9am
-    if (startDurationMillis < startOfWorkDay.valueOf()) {
-      startOfDuration = startOfWorkDay;
-    }
 
     // If the events are on different days, create a curation object for each day in-between and push it onto the array
     // PROBLEM: CAN'T USE WEEKENDS
-    let tempEndOfDuration = endOfDuration
-    let tempStartOfDuration = startOfDuration
+    // moment().set() mutates the moment it operates on, so make temp vars for it to mutate instead
+    let tempStartOfDuration = startOfDuration;
+    let tempEndOfDuration = endOfDuration;
 
-    let daysBetweenEvents
+    console.log(
+      startOfDuration.format("YYYY-MM-DD hh:mm:ss").toString(),
+      endOfDuration.format("YYYY-MM-DD hh:mm:ss").toString()
+    );
+
+    // If the duration takes place over more than one day:
     if (!startOfDuration.isSame(endOfDuration, "day")) {
-
       // Make sure the duration ends/starts on the same day as the last event and current event, respectively
-      let endOfDurationSameDay = tempStartOfDuration
-      .set("hour", 17)
-      .set("minute", 0)
-      .set("second", 0);
+      // Make a duration for the remainder of the day
+      const endOfDurationSameDay = tempStartOfDuration
+        .set("hour", 17)
+        .set("minute", 0)
+        .set("second", 0);
 
-      // Push the start duration obj (from i.e. 3pm to 5pm) to timeGaps
-      createDuration(timeGaps, i, startOfDuration, endOfDurationSameDay, gapDuration)
+      // Push the first duration obj (from i.e. 3pm -> 5pm) to timeGaps
+      createDuration(
+        timeGaps,
+        i,
+        startOfDuration,
+        endOfDurationSameDay,
+        gapDuration
+      );
 
       // And then fill in for the days between
-      daysBetweenEvents = Math.abs(startOfDuration.diff(endOfDuration, 'days'))-1
+      const daysBetweenEvents =
+        Math.abs(startOfDuration.diff(endOfDuration, "days")) - 1;
+
       // for each daysBetweenEvents, create duration obj and push to timGaps
       for (let j = 0; j < daysBetweenEvents; j++) {
-        startOfDuration = 
+        const startOfDurationNoEventsInDay = startOfDuration;
+        startOfDurationNoEventsInDay
+          .set("hour", 9)
+          .set("minute", 0)
+          .set("second", 0)
+          .add(j, "d");
 
-        createDuration(timeGaps, i, startOfDuration, endOfDuration, gapDuration)
+        const endOfDurationNoEventsInDay = endOfDuration;
+        endOfDurationNoEventsInDay
+          .set("hour", 17)
+          .set("minute", 0)
+          .set("second", 0)
+          .add(j, "d");
+
+        createDuration(
+          timeGaps,
+          i,
+          startOfDurationNoEventsInDay,
+          endOfDurationNoEventsInDay,
+          gapDuration
+        );
       }
 
       // Then push the end duration object (i.e. 9am to 11:30am) to timeGaps
-      let startOfDurationSameDay = tempEndOfDuration
-      .set("hour", 9)
-      .set("minute", 0)
-      .set("second", 0);
+      const startOfDurationSameDay = tempEndOfDuration
+        .set("hour", 9)
+        .set("minute", 0)
+        .set("second", 0);
 
-      createDuration(timeGaps, i, startOfDurationSameDay, endOfDuration, gapDuration)
+      createDuration(
+        timeGaps,
+        i,
+        startOfDurationSameDay,
+        endOfDuration,
+        gapDuration
+      );
+
+      // Need to skip weekends
 
       // And finally, continue, as we have already dealt with all duration between the two events:
       continue;
     }
-    createDuration(timeGaps, i, startOfDuration, endOfDuration, gapDuration)
+
+    console.log(
+      startOfDuration.format("YYYY-MM-DD hh:mm:ss").toString(),
+      endOfDuration.format("YYYY-MM-DD hh:mm:ss").toString()
+    );
+
+    // Need to make sure durations end at the end of the work day
+    // checks if end is after 5pm
+
+    let endOfDurationWorkDay = endOfDuration;
+    let startOfDurationWorkDay = startOfDuration;
+
+    if (endOfDurationMillis > endOfWorkDay.valueOf()) {
+      endOfDurationWorkDay = endOfWorkDay;
+    }
+    // Checks if start before 9am
+    if (startDurationMillis < startOfWorkDay.valueOf()) {
+      startOfDurationWorkDay = startOfWorkDay;
+    }
+
+    createDuration(
+      timeGaps,
+      i,
+      startOfDurationWorkDay,
+      endOfDurationWorkDay,
+      gapDuration
+    );
   }
   return timeGaps;
 }
+
+/**
+ * Creates a duration object
+ * @param {array} timeGaps
+ * @param {int} i
+ * @param {String} startOfDuration
+ * @param {String} endOfDuration
+ * @param {String} gapDuration
+ */
+const createDuration = (
+  timeGaps,
+  i,
+  startOfDuration,
+  endOfDuration,
+  gapDuration
+) => {
+  timeGaps.push({
+    id: i,
+    startGapDuration: startOfDuration.format("YYYY-MM-DD hh:mm:ss").toString(),
+    endGapDuration: endOfDuration.format("YYYY-MM-DD hh:mm:ss").toString(),
+    gapDuration: gapDuration
+  });
+};
