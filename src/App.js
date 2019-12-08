@@ -11,6 +11,10 @@ import { eventTime } from "./utils/eventTime.js";
 import { sortEvents } from "./utils/sortEvents.js";
 import { removeDuplicates } from "./utils/removeDuplicates";
 
+/**
+ * TODO:
+ * Exclude weekends from duration object generation
+ */
 
 class App extends Component {
   calendarComponentRef = React.createRef();
@@ -42,28 +46,39 @@ class App extends Component {
     });
 
     // Get duration objects of free time gaps
-    const timeGaps = this.findGap(renamedEvents);
+    const timeGaps = this.findDuration(renamedEvents);
 
-    const duplicateInvitesRemoved = removeDuplicates(sortedInvites)
+    console.log("Duration objects: ", timeGaps);
 
-    const readyForCalendarInvites = this.schedule(duplicateInvitesRemoved, timeGaps);
+    const duplicateInvitesRemoved = removeDuplicates(sortedInvites);
+
+    const readyForCalendarInvites = this.schedule(
+      duplicateInvitesRemoved,
+      timeGaps
+    );
 
     // Then set to calendar state
   }
 
   // One loop for finding time gaps between events
-  findGap = events => {
+  findDuration = events => {
     const timeGaps = [];
     for (let i = 0; i < events.length; i++) {
-      // When first event in array, skip to next event
+      const currentEvent = events[i];
+      const lastEvent = events[i - 1];
+
+      // When first event in array, set the last 'event' to be x, so you can start assigning invites from now.
       if (i === 0) {
         continue;
       }
 
-      const lastEvent = events[i - 1];
-      const currentEvent = events[i];
-
       const gapDuration = eventTime(lastEvent, currentEvent);
+
+      // If there are no more events, set it to arbitrary point in future, so we can have a certain amount of time free to assign invites
+      // This is terrifically terrible, I'm so sorry
+      if (currentEvent === null) {
+        currentEvent.start = "2030-01-01 09:00:00";
+      }
 
       // When there is no spare time between events
       if (gapDuration === 0) {
@@ -71,49 +86,47 @@ class App extends Component {
         continue;
       }
 
-      // Check this - would it help simplify this
-      // https://stackoverflow.com/questions/15130735/how-can-i-remove-time-from-date-with-moment-js
-
-      // Check if the start and finish of the two invites are on the same day
-      // This is because times can still be within work hours, just spanning several days.
-      var formatDay = 'YYYY-MM-DD'
-      let dayOfLastEvent = moment(lastEvent.end, formatDay);
-      let dayOfCurrentEvent = moment(currentEvent.start, formatDay);
-      if (!dayOfLastEvent.isSame(dayOfCurrentEvent, 'day')) {
-        // Set startDuration to 9am of correct day
-      }
-
       // Then check if within work hours
-      var formatMinutes = 'hh:mm:ss'
-      let startOfDay = moment('09:00:00', formatMinutes);
-      let endOfDay = moment('17:00:00', formatMinutes);
-      let startOfDuration = moment(lastEvent.start, formatMinutes)
-      let endOfDuration = moment(currentEvent.end, formatMinutes)
-    
+      let startOfDuration = moment(lastEvent.end);
+      let endOfDuration = moment(currentEvent.start);
+      let startDurationMillis = moment(lastEvent.end).valueOf();
+      let endOfDurationMillis = moment(currentEvent.start).valueOf();
+
+      let startOfWorkDay = moment(lastEvent.end)
+        .set("hour", 9)
+        .set("minute", 0)
+        .set("second", 0);
+      let endOfWorkDay = moment(currentEvent.start)
+        .set("hour", 17)
+        .set("minute", 0)
+        .set("second", 0);
+
       // checks if end is after 5pm
-      if (this.minutesOfDay(endOfDuration) > this.minutesOfDay(endOfDay)) {
-        endOfDuration = '5pm + the date'
+      if (endOfDurationMillis > endOfWorkDay.valueOf()) {
+        endOfDuration = endOfWorkDay;
       }
       // Checks if start before 9am
-      if (this.minutesOfDay(startOfDuration) < this.minutesOfDay(startOfDay)) {
-        startOfDuration = '9am + date'
+      if (startDurationMillis < startOfWorkDay.valueOf()) {
+        startOfDuration = startOfWorkDay;
       }
 
-      // When there is spare time between events get the times (start and end)
-      // Add to array of 'gap' objects, with each obj having a start, end and duration?
+      // If the events are on different days, create a curation object for each day in-between and push it onto the array
+      // PROBLEM: CAN'T USE WEEKENDS
+      if (!startOfDuration.isSame(endOfDuration, "day")) {
+        console.log("not on the same day");
+      }
+
       timeGaps.push({
         id: i,
-        startGapDuration: startOfDuration,
-        endGapDuration: endOfDuration,
+        startGapDuration: startOfDuration
+          .format("YYYY-MM-DD hh:mm:ss")
+          .toString(),
+        endGapDuration: endOfDuration.format("YYYY-MM-DD hh:mm:ss").toString(),
         gapDuration: gapDuration
-      })
+      });
     }
     return timeGaps;
   };
-
-  minutesOfDay = (m) => {
-    return m.minutes() + m.hours() * 60;
-  }
 
   // one loop for re-assigning invites to times throughout either the same day or if not, that week.
   // If you can't fit one in the week, rollover?
@@ -122,18 +135,17 @@ class App extends Component {
   // Currently, complexity is O(n) + O(n^2) >:/
   schedule = (invites, timeGaps) => {
     for (let i = 0; i < invites.length; i++) {
-
       const lastInvite = invites[i - 1];
       const currentInvite = invites[i];
 
       // Make sure invites aren't out of work hours. If they are, reassign
       // Wrong way to do this. Just instead have a condition in the function below that blocks assignment before 9, after 5
 
-      // Assign invites to time gaps 
+      // Assign invites to time gaps
       // Now loop over each duration object. first that durationObjDuration > inviteDuration, assign.
       // Then check length of new durationObjDuration (change it to reflect that there's now an invite in it.)
 
-      // before assigning/changing the invites data, do a check to see if what it is about to be changed to is after 5/ before 9. 
+      // before assigning/changing the invites data, do a check to see if what it is about to be changed to is after 5/ before 9.
 
       //then assign to state
 
@@ -170,7 +182,7 @@ class App extends Component {
   };
 
   render() {
-    console.log("In the render: ", this.state.calendarEvents);
+    console.log("Events In the render: ", this.state.calendarEvents);
 
     return (
       <div className="demo-app">

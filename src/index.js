@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
-import AppMK2 from "./AppMK2";
 import * as serviceWorker from "./serviceWorker";
 
 /**
