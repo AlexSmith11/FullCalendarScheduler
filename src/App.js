@@ -71,18 +71,24 @@ class App extends Component {
       const currentEvent = events[i];
       const lastEvent = events[i - 1];
 
+      console.log(currentEvent)
+
       const overlappingTime = eventTime(lastEvent, currentEvent);
 
       // Check if an invite is within work days or hours
-      if (!event.event) {
+      // If not, move it so that it is
+      if (currentEvent.isEvent = false) {
         if (!isInWorkHours(currentEvent) && !isInWorkDays(currentEvent)) {
           // If out of hours and on a weekend:
           events[i] = moveToWorkDay(currentEvent);
-        } else if (!isInWorkHours(currentEvent)) {
+        }
+        if (!isInWorkHours(currentEvent)) {
           // If out of hours:
           events[i] = moveToWorkHour(currentEvent);
         }
       }
+
+      console.log(currentEvent)
 
       // Overlapping events
       if (overlappingTime > 0) {

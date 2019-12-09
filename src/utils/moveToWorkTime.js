@@ -1,7 +1,7 @@
 import moment from "moment";
 /**
  * Moves an event from out-of-hours to within
- * Keeps the date of the object, just moves it to the start of the day
+ * Keeps the date of the object, just moves it to the start of the day (9am) and to the monday if it's a weekend
  * @param {object} event
  */
 export function moveToWorkHour(event) {
@@ -19,6 +19,8 @@ export function moveToWorkHour(event) {
     .valueOf();
   const endOfEventInMillis = startOfEventInMillis + eventLengthInMillis;
 
+  console.log(endOfEventInMillis)
+
   // convert from millis to date strings
   event.start = moment(startOfEventInMillis)
     .format("YYYY-MM-DD hh:mm:ss")
@@ -33,25 +35,39 @@ export function moveToWorkHour(event) {
 
 // If this is called, we know that the day is either sat or sun. Just add 48 hours
 export function moveToWorkDay(event) {
-  inWorkHour = this.moveToWorkHour(event)
-  const dayOfEvent = moment(event.end).toDate()
+  // So that the event is always set to 9am
+  const inWorkHour = this.moveToWorkHour(event)
+  const dayOfEvent = moment(inWorkHour.end).toDate()
   var day = dayOfEvent.getDay();
 
-  // If Sat add 48 hours
-  if (day === 6) {
-    const newEventSat = new Date(dayOfEvent.getTime() + (2 * 24 * 60 * 60 * 1000));
-    const newEventMomentSat = moment(newEventSat).format("YYYY-MM-DD hh:mm:ss")
-      .toString();
-    return newEventMomentSat
-  }
+  const millisInDay = 1000 * 60 * 60 * 24
+  const startOfEventInMillis = moment(event.start).valueOf()
+  const endOfEventInMillis = moment(event.end).valueOf()
 
-  // If Sun add 24 Hours
-  if (day === 0) {
-    const newEventSun = new Date(dayOfEvent.getTime() + (1 * 24 * 60 * 60 * 1000));
-    const newEventMomentSun = moment(newEventSun).format("YYYY-MM-DD hh:mm:ss")
-      .toString();
-    return newEventMomentSun
+  let startOfEvent
+  let endOfEvent
+
+  // If Saturday add 48 hours
+  if (day === 6) {
+    startOfEvent = startOfEventInMillis + (millisInDay*2)
+    endOfEvent = endOfEventInMillis + (millisInDay*2)
   }
+  // If Sunday add 24 hours
+  if (day === 0) {
+    startOfEvent = startOfEventInMillis + millisInDay
+    endOfEvent = endOfEventInMillis + millisInDay
+  }
+  // convert from millis to date strings
+  event.start = moment(startOfEvent)
+    .format("YYYY-MM-DD hh:mm:ss")
+    .toString();
+
+    // convert from millis to date strings
+  event.end = moment(endOfEvent)
+  .format("YYYY-MM-DD hh:mm:ss")
+  .toString();
+
+  return event
 }
 
 //TODO:
