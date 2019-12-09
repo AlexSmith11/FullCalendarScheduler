@@ -1,6 +1,6 @@
 import moment from "moment";
 /**
- * Determines if current event is in work time
+ * Determines if current event is in work time (9am-5pm, mon-fri)
  * Returns true if so
  * @param {object} event
  */
