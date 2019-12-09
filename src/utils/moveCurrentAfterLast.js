@@ -5,12 +5,15 @@ import moment from "moment";
  * @param {object} currentEvent
  */
 export function moveCurrentAfterLast(lastEvent, currentEvent) {
+  console.log(lastEvent.end)
   const lastEventEnd = moment(lastEvent.end)
     .format("YYYY-MM-DD hh:mm:ss")
     .toString();
   const currentEventLengthInMillis = moment(currentEvent.start)
     .diff(moment(currentEvent.end))
     .valueOf();
+
+    console.log(lastEvent.end)
 
   const newCurrentStart = lastEventEnd;
   const newCurrentLength = moment(currentEventLengthInMillis)

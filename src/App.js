@@ -5,7 +5,10 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 
 import "./main.scss";
 import { getEvents, getInvites } from "./utils/api.js";
-import { formatParamNamesEvents,  formatParamNamesInvites} from "./utils/formatParamNames.js";
+import {
+  formatParamNamesInvite,
+  formatParamNamesEvent
+} from "./utils/formatParamNames.js";
 import { sortEvents } from "./utils/sortEvents.js";
 import { eventTime } from "./utils/eventTime";
 import { invitesMatch } from "./utils/invitesMatch";
@@ -13,9 +16,6 @@ import { isInWorkTime } from "./utils/isInWorkTime";
 import { moveToWorkTime } from "./utils/moveToWorkTime";
 import { moveLastAfterCurrent } from "./utils/moveLastAfterCurrent";
 import { moveCurrentAfterLast } from "./utils/moveCurrentAfterLast";
-
-
-
 
 /**
  * TODO:
@@ -41,23 +41,27 @@ class App extends Component {
     const events = eventsResponse.data;
     const invites = invitesResponse.data;
 
-    const renamedPrimaryEvents = formatParamNamesEvents(events);
-    const renamedInvites = formatParamNamesInvites(invites);
-    console.log("renamed events: ", renamedPrimaryEvents)
+    console.log(events);
 
-    const allEvents = [...renamedPrimaryEvents, ...renamedInvites];
-    console.log("all events: ", allEvents)
+    const renamedEvents = formatParamNamesEvent(events);
+    const renamedInvites = formatParamNamesInvite(invites);
+    console.log("renamed events: ", renamedEvents);
+    console.log("renamed invites: ", renamedInvites);
 
+    const allEvents = [...renamedEvents, ...renamedInvites];
+    console.log("all events: ", allEvents);
 
     const sortedEvents = sortEvents(allEvents);
-    console.log("Sorted events: ", sortedEvents)
+    console.log("Sorted events: ", sortedEvents);
 
     const scheduledEvents = this.schedule(sortedEvents);
-    console.log("Scheduled events: ", scheduledEvents)
+    console.log("Scheduled events: ", scheduledEvents);
     // Then set scheduled events to calendar state
   }
 
-  // NEED TO CHECK IF EVENT IS EVENT OR INV
+  // CHECK FOR WEEKENDS
+  // Moment is throwing errors
+  // https://stackoverflow.com/questions/43101278/how-to-handle-deprecation-warning-in-momentjs
   schedule = events => {
     for (let i = 0; i < events.length; i++) {
       if (i === 0) {
@@ -68,15 +72,20 @@ class App extends Component {
       const currentEvent = events[i];
       const lastEvent = events[i - 1];
 
-      console.log(currentEvent)
-
       const overlappingTime = eventTime(lastEvent, currentEvent);
+
+      // Remove invite on match
+      // BUG IS HERE (or in moveLastAfter's)
+      console.log(invitesMatch(lastEvent, currentEvent));
+      if (invitesMatch(lastEvent, currentEvent)) {
+        events.splice(i, 1);
+        i -= 1;
+        continue;
+      }
 
       // Check if an invite is within work times
       if (!isInWorkTime(currentEvent)) {
-        console.log(events[i])
         events[i] = moveToWorkTime(currentEvent);
-        console.log(events[i])
       }
 
       // Overlapping events
@@ -84,16 +93,11 @@ class App extends Component {
         continue;
       }
 
-      // Remove invite on match
-      if (invitesMatch(lastEvent, currentEvent)) {
-        events.splice(i, 1);
-        i -= 1;
-        continue;
-      }
+      const moveCurrent =
+        currentEvent.event || (!currentEvent.event && !lastEvent.event);
 
-      const moveCurrent = currentEvent.event || (!currentEvent.event && !lastEvent.event);
-
-      if(moveCurrent) {
+      // If event is original, move the conflicting event (invite)
+      if (moveCurrent) {
         const newLast = moveLastAfterCurrent(lastEvent, currentEvent);
         events[i - 1] = events[i];
         events[i] = newLast;
