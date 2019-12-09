@@ -4,31 +4,45 @@ import moment from "moment";
  * Returns true if so
  * @param {object} event
  */
-export function isInWorkTime(event) {
-  const startOfEvent = moment(event.start).valueOf();
-  const endOfEvent = moment(event.end).valueOf();
-  // Set the current days start/finish times
-  const startOfWorkDay = moment(event.end)
-    .set("hour", 9)
-    .set("minute", 0)
-    .set("second", 0)
-    .valueOf();
-  const endOfWorkDay = moment(event.start)
-    .set("hour", 17)
-    .set("minute", 0)
-    .set("second", 0)
-    .valueOf();
 
-  let inHours = true;
+const startOfEventInMillis = moment(event.start).valueOf();
+const endOfEventInMillis = moment(event.end).valueOf();
+// Set the current days start/finish times
+const startOfWorkDayInMillis = moment(event.end)
+  .set("hour", 9)
+  .set("minute", 0)
+  .set("second", 0)
+  .valueOf();
+const endOfWorkDayInMillis = moment(event.start)
+  .set("hour", 17)
+  .set("minute", 0)
+  .set("second", 0)
+  .valueOf();
 
-  if (startOfEvent < startOfWorkDay) {
+let inHours = true;
+let inDays = true;
+
+// Check hour
+export function isInWorkHours(event) {
+  if (startOfEventInMillis < startOfWorkDayInMillis) {
     console.log("this event starts before 9am");
     inHours = false;
-  } else if (endOfEvent > endOfWorkDay) {
+  } else if (endOfEventInMillis > endOfWorkDayInMillis) {
     console.log("This event finishes after 5pm");
     inHours = false;
   } else {
     inHours = true;
   }
   return inHours;
+}
+
+// Check day
+export function isInWorkDays(event) {
+  const dayOfEvent = moment(event.end).toDate()
+  var day = dayOfEvent.getDay();
+  var isWeekend = (day === 6) || (day === 0);
+  if (isWeekend) {
+    inDays = false
+  }
+return inDays
 }

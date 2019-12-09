@@ -12,8 +12,8 @@ import {
 import { sortEvents } from "./utils/sortEvents.js";
 import { eventTime } from "./utils/eventTime";
 import { invitesMatch } from "./utils/invitesMatch";
-import { isInWorkTime } from "./utils/isInWorkTime";
-import { moveToWorkTime } from "./utils/moveToWorkTime";
+import { isInWorkHours, isInWorkDays } from "./utils/isInWorkTime";
+import { moveToWorkHour, moveToWorkDay } from "./utils/moveToWorkTime";
 import { moveLastAfterCurrent } from "./utils/moveLastAfterCurrent";
 import { moveCurrentAfterLast } from "./utils/moveCurrentAfterLast";
 
@@ -59,8 +59,7 @@ class App extends Component {
     // Then set scheduled events to calendar state
   }
 
-  // CHECK FOR WEEKENDS
-  // Moment is throwing errors
+  // Moment is destroying dates ???
   // https://stackoverflow.com/questions/43101278/how-to-handle-deprecation-warning-in-momentjs
   schedule = events => {
     for (let i = 0; i < events.length; i++) {
@@ -74,18 +73,15 @@ class App extends Component {
 
       const overlappingTime = eventTime(lastEvent, currentEvent);
 
-      // Remove invite on match
-      // BUG IS HERE (or in moveLastAfter's)
-      console.log(invitesMatch(lastEvent, currentEvent));
-      if (invitesMatch(lastEvent, currentEvent)) {
-        events.splice(i, 1);
-        i -= 1;
-        continue;
-      }
-
-      // Check if an invite is within work times
-      if (!isInWorkTime(currentEvent)) {
-        events[i] = moveToWorkTime(currentEvent);
+      // Check if an invite is within work days or hours
+      if (!event.event) {
+        if (!isInWorkHours(currentEvent) && !isInWorkDays(currentEvent)) {
+          // If out of hours and on a weekend:
+          events[i] = moveToWorkDay(currentEvent);
+        } else if (!isInWorkHours(currentEvent)) {
+          // If out of hours:
+          events[i] = moveToWorkHour(currentEvent);
+        }
       }
 
       // Overlapping events
@@ -93,18 +89,27 @@ class App extends Component {
         continue;
       }
 
+      // Remove invite on match
+      // BUG IS HERE (or in moveLastAfter's)
+      // console.log(invitesMatch(lastEvent, currentEvent));
+      // if (invitesMatch(lastEvent, currentEvent)) {
+      //   events.splice(i, 1);
+      //   i -= 1;
+      //   continue;
+      // }
+
       const moveCurrent =
         currentEvent.event || (!currentEvent.event && !lastEvent.event);
 
-      // If event is original, move the conflicting event (invite)
-      if (moveCurrent) {
-        const newLast = moveLastAfterCurrent(lastEvent, currentEvent);
-        events[i - 1] = events[i];
-        events[i] = newLast;
-        i -= 1;
-        continue;
-      }
-      events[i] = moveCurrentAfterLast(lastEvent, currentEvent);
+      // // If event is original, move the conflicting event (invite)
+      // if (moveCurrent) {
+      //   const newLast = moveLastAfterCurrent(lastEvent, currentEvent);
+      //   events[i - 1] = events[i];
+      //   events[i] = newLast;
+      //   i -= 1;
+      //   continue;
+      // }
+      // events[i] = moveCurrentAfterLast(lastEvent, currentEvent);
     }
     return events;
   };
