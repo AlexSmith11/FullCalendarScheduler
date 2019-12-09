@@ -5,25 +5,25 @@ import moment from "moment";
  * @param {object} event
  */
 
-const startOfEventInMillis = moment(event.start).valueOf();
-const endOfEventInMillis = moment(event.end).valueOf();
-// Set the current days start/finish times
-const startOfWorkDayInMillis = moment(event.end)
-  .set("hour", 9)
-  .set("minute", 0)
-  .set("second", 0)
-  .valueOf();
-const endOfWorkDayInMillis = moment(event.start)
-  .set("hour", 17)
-  .set("minute", 0)
-  .set("second", 0)
-  .valueOf();
-
 let inHours = true;
 let inDays = true;
 
 // Check hour
 export function isInWorkHours(event) {
+  const startOfEventInMillis = moment(event.start).valueOf();
+  const endOfEventInMillis = moment(event.end).valueOf();
+  // Set the current days start/finish times
+  const startOfWorkDayInMillis = moment(event.end)
+    .set("hour", 9)
+    .set("minute", 0)
+    .set("second", 0)
+    .valueOf();
+  const endOfWorkDayInMillis = moment(event.start)
+    .set("hour", 17)
+    .set("minute", 0)
+    .set("second", 0)
+    .valueOf();
+
   if (startOfEventInMillis < startOfWorkDayInMillis) {
     console.log("this event starts before 9am");
     inHours = false;
@@ -39,10 +39,12 @@ export function isInWorkHours(event) {
 // Check day
 export function isInWorkDays(event) {
   const dayOfEvent = moment(event.end).toDate()
-  var day = dayOfEvent.getDay();
-  var isWeekend = (day === 6) || (day === 0);
+  const dayOfCurrentWeek = dayOfEvent.getDay();
+  var isWeekend = (dayOfCurrentWeek === 6) || (dayOfCurrentWeek === 0);
   if (isWeekend) {
     inDays = false
+  } else {
+    inDays = true;
   }
-return inDays
+  return inDays
 }
