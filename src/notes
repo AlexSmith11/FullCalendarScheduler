@@ -1,8 +1,0 @@
-const eventsResponse = await getEvents();
-const invitesResponse = await getInvites();
-const events = eventsResponse.data;
-const invites = invitesResponse.data;
-
-const { data: eventData } = await getEvents();
-const { data: inviteData } = await getInvites();
-

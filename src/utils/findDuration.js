@@ -32,9 +32,7 @@ export function findDuration(events) {
       // If there's no overlap with prev event, skip to next event. There's never any clashing between events.
       continue;
     }
-
-    console.log(events)
-
+    
     // Then check if within work hours
     const startOfDuration = moment(lastEvent.end);
     const endOfDuration = moment(currentEvent.start);
@@ -52,18 +50,14 @@ export function findDuration(events) {
     // If the events are on different days, create a curation object for each day in-between and push it onto the array
     // PROBLEM: CAN'T USE WEEKENDS
     // moment().set() mutates the moment it operates on, so make temp vars for it to mutate instead
-    let tempStartOfDuration = startOfDuration;
-    let tempEndOfDuration = endOfDuration;
-
-    console.log(
-      startOfDuration.format("YYYY-MM-DD hh:mm:ss").toString(),
-      endOfDuration.format("YYYY-MM-DD hh:mm:ss").toString()
-    );
+    const tempStartOfDuration = startOfDuration;
+    const tempEndOfDuration = endOfDuration;
 
     // If the duration takes place over more than one day:
     if (!startOfDuration.isSame(endOfDuration, "day")) {
       // Make sure the duration ends/starts on the same day as the last event and current event, respectively
       // Make a duration for the remainder of the day
+
       const endOfDurationSameDay = tempStartOfDuration
         .set("hour", 17)
         .set("minute", 0)
@@ -127,14 +121,8 @@ export function findDuration(events) {
       continue;
     }
 
-    console.log(
-      startOfDuration.format("YYYY-MM-DD hh:mm:ss").toString(),
-      endOfDuration.format("YYYY-MM-DD hh:mm:ss").toString()
-    );
-
     // Need to make sure durations end at the end of the work day
     // checks if end is after 5pm
-
     let endOfDurationWorkDay = endOfDuration;
     let startOfDurationWorkDay = startOfDuration;
 

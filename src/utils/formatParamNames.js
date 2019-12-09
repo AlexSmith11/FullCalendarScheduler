@@ -2,10 +2,18 @@
  * Settings for the renaming of events
  * @param {*} items 
  */
-export function formatParamNames(items) {
-  return items.map(item => ({
-    title: item.name,
-    end: item.endTime,
-    start: item.startTime
+export const formatParamNamesInvites = (invites) => {
+  return invites.map(invite => ({
+    title: invite.name,
+    end: invite.endTime,
+    start: invite.startTime
+  }));
+}
+export const formatParamNamesEvents = (events) => {
+  return events.map(event => ({
+    title: event.name,
+    end: event.endTime,
+    start: event.startTime,
+    isEvent: true , ...event
   }));
 }

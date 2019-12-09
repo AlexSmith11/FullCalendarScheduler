@@ -5,10 +5,17 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 
 import "./main.scss";
 import { getEvents, getInvites } from "./utils/api.js";
-import { formatParamNames } from "./utils/formatParamNames.js";
+import { formatParamNamesEvents,  formatParamNamesInvites} from "./utils/formatParamNames.js";
 import { sortEvents } from "./utils/sortEvents.js";
-import { removeDuplicates } from "./utils/removeDuplicates";
-import { findDuration } from "./utils/findDuration";
+import { eventTime } from "./utils/eventTime";
+import { invitesMatch } from "./utils/invitesMatch";
+import { isInWorkTime } from "./utils/isInWorkTime";
+import { moveToWorkTime } from "./utils/moveToWorkTime";
+import { moveLastAfterCurrent } from "./utils/moveLastAfterCurrent";
+import { moveCurrentAfterLast } from "./utils/moveCurrentAfterLast";
+
+
+
 
 /**
  * TODO:
@@ -34,68 +41,68 @@ class App extends Component {
     const events = eventsResponse.data;
     const invites = invitesResponse.data;
 
-    const renamedEvents = formatParamNames(events);
-    const renamedInvites = formatParamNames(invites);
+    const renamedPrimaryEvents = formatParamNamesEvents(events);
+    const renamedInvites = formatParamNamesInvites(invites);
+    console.log("renamed events: ", renamedPrimaryEvents)
 
-    const sortedInvites = sortEvents(renamedInvites);
+    const allEvents = [...renamedPrimaryEvents, ...renamedInvites];
+    console.log("all events: ", allEvents)
 
-    // temp
-    this.setState({
-      calendarEvents: renamedEvents
-    });
 
-    const timeGaps = findDuration(renamedEvents);
+    const sortedEvents = sortEvents(allEvents);
+    console.log("Sorted events: ", sortedEvents)
 
-    console.log("Duration objects: ", timeGaps);
-
-    const duplicateInvitesRemoved = removeDuplicates(sortedInvites);
-
-    const readyForCalendarInvites = this.schedule(
-      duplicateInvitesRemoved,
-      timeGaps
-    );
-
-    // Then set to calendar state
+    const scheduledEvents = this.schedule(sortedEvents);
+    console.log("Scheduled events: ", scheduledEvents)
+    // Then set scheduled events to calendar state
   }
 
-  // one loop for re-assigning invites to times throughout either the same day or if not, that week.
-  // If you can't fit one in the week, rollover?
-  // There needs to be nested loop to check for gaps and more 'cleverly' assign invites to times (rather than just put them all at the end of the array)
-  // time complexity is O(n^2) :c cant use hashes as we aren't using direct comparisons. Also can't use JSON stringify to compare.
-  // Currently, complexity is O(n) + O(n^2) >:/
-  schedule = (invites, timeGaps) => {
-    for (let i = 0; i < invites.length; i++) {
-      const lastInvite = invites[i - 1];
-      const currentInvite = invites[i];
+  // NEED TO CHECK IF EVENT IS EVENT OR INV
+  schedule = events => {
+    for (let i = 0; i < events.length; i++) {
+      if (i === 0) {
+        // cant use last event as we are at the first event
+        continue;
+      }
 
-      // Make sure invites aren't out of work hours. If they are, reassign
-      // Wrong way to do this. Just instead have a condition in the function below that blocks assignment before 9, after 5
+      const currentEvent = events[i];
+      const lastEvent = events[i - 1];
 
-      // Assign invites to time gaps
-      // Now loop over each duration object. first that durationObjDuration > inviteDuration, assign.
-      // Then check length of new durationObjDuration (change it to reflect that there's now an invite in it.)
+      console.log(currentEvent)
 
-      // before assigning/changing the invites data, do a check to see if what it is about to be changed to is after 5/ before 9.
+      const overlappingTime = eventTime(lastEvent, currentEvent);
 
-      //then assign to state
+      // Check if an invite is within work times
+      if (!isInWorkTime(currentEvent)) {
+        console.log(events[i])
+        events[i] = moveToWorkTime(currentEvent);
+        console.log(events[i])
+      }
 
-      // invites.forEach(timeGaps) { if(timeGaps[i] != null* && ...){continue;} }
-      // *Need this - some iterations wont have gaps, so id's will be like: [2, 3, 5, 7, 8, 9, 11...]
+      // Overlapping events
+      if (overlappingTime > 0) {
+        continue;
+      }
 
-      // Do I need a forEach?
-      // https://stackoverflow.com/questions/41603036/get-the-index-of-the-first-element-in-an-array-with-value-greater-than-x
-      // So:
-      /**
-       * Find first index where invDur is smaller than (so can fit inside of) the gapDuration
-       * var index = timeGaps.findIndex(inviteDuration => inviteDuration < gapDuration);
-       * Then assign vals:
-       */
+      // Remove invite on match
+      if (invitesMatch(lastEvent, currentEvent)) {
+        events.splice(i, 1);
+        i -= 1;
+        continue;
+      }
 
-      timeGaps.forEach(element => {
-        // Is this the wrong way - loop over gaps or invites first?
-        // Need to find first timeGap that has large enough duration for an invite to fit, then assign values.
-      });
+      const moveCurrent = currentEvent.event || (!currentEvent.event && !lastEvent.event);
+
+      if(moveCurrent) {
+        const newLast = moveLastAfterCurrent(lastEvent, currentEvent);
+        events[i - 1] = events[i];
+        events[i] = newLast;
+        i -= 1;
+        continue;
+      }
+      events[i] = moveCurrentAfterLast(lastEvent, currentEvent);
     }
+    return events;
   };
 
   toggleWeekends = () => {
