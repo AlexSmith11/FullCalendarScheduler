@@ -10,7 +10,6 @@ let inDays = true;
 
 // Check hour
 export function isInWorkHours(event) {
-  console.log('hi')
   const startOfEventInMillis = moment(event.start).valueOf();
   const endOfEventInMillis = moment(event.end).valueOf();
   // Set the current days start/finish times
