@@ -7,7 +7,9 @@ export function sortEvents(items) {
     const sorted = items.sort(function compare(a, b) {
       var dateA = new Date(a.start);
       var dateB = new Date(b.start);
+      console.log(dateA - dateB)
       return dateA - dateB;
     });
     return sorted;
   }
+  

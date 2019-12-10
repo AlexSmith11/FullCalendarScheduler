@@ -1,7 +1,7 @@
 import moment from "moment";
 /**
  * Moves an event from out-of-hours to within
- * Keeps the date of the object, just moves it to the start of the day (9am) and to the monday if it's a weekend
+ * Keeps the date of the object, just moves it to the start of the next day (9am).
  * @param {object} event
  */
 export function moveToWorkHour(event) {
@@ -13,6 +13,7 @@ export function moveToWorkHour(event) {
 
   // Keep the date, just set the time
   const startOfEventInMillis = moment(tempEvent.start)
+    .add(1, 'day')
     .set("hour", 9)
     .set("minute", 0)
     .set("second", 0)
@@ -22,15 +23,10 @@ export function moveToWorkHour(event) {
   console.log(endOfEventInMillis)
 
   // convert from millis to date strings
-  event.start = moment(startOfEventInMillis)
-    .format("YYYY-MM-DD hh:mm:ss")
-    .toString();
-  event.end = moment(endOfEventInMillis)
-    .format("YYYY-MM-DD hh:mm:ss")
-    .toString();
+  event.start = moment(startOfEventInMillis);
+  event.end = moment(endOfEventInMillis);
 
   return event;
-
 }
 
 // If this is called, we know that the day is either sat or sun. Just add 48 hours
@@ -58,14 +54,8 @@ export function moveToWorkDay(event) {
     endOfEvent = endOfEventInMillis + millisInDay
   }
   // convert from millis to date strings
-  event.start = moment(startOfEvent)
-    .format("YYYY-MM-DD hh:mm:ss")
-    .toString();
-
-    // convert from millis to date strings
-  event.end = moment(endOfEvent)
-  .format("YYYY-MM-DD hh:mm:ss")
-  .toString();
+  event.start = moment(startOfEvent);
+  event.end = moment(endOfEvent);
 
   return event
 }

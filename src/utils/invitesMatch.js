@@ -4,6 +4,6 @@
  */
 export function invitesMatch(a, b) {
   return (
-    a.name === b.name && a.start === b.start && a.end === b.end
+    a.title === b.title && a.origStart.isSame(b.origStart) && a.origEnd.isSame(b.origEnd)
   );
 }

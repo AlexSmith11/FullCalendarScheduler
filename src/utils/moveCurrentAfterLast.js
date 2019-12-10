@@ -1,27 +1,24 @@
 import moment from "moment";
 /**
- * Moves the current object so that it takes place directly after the last
+ * Moves the previous event so that it instead takes place right after the current
  * @param {object} lastEvent
  * @param {object} currentEvent
  */
-export function moveCurrentAfterLast(lastEvent, currentEvent) {
-  console.log(lastEvent.end)
-  const lastEventEnd = moment(lastEvent.end)
+export function moveLastAfterCurrent(lastEvent, currentEvent) {
+  const currentEventEnd = moment(currentEvent.end)
     .format("YYYY-MM-DD hh:mm:ss")
     .toString();
-  const currentEventLengthInMillis = moment(currentEvent.start)
-    .diff(moment(currentEvent.end))
+  const lastEventLengthInMillis = moment(lastEvent.start)
+    .diff(moment(lastEvent.end))
     .valueOf();
 
-    console.log(lastEvent.end)
-
-  const newCurrentStart = lastEventEnd;
-  const newCurrentLength = moment(currentEventLengthInMillis)
+  const newLastStart = currentEventEnd;
+  const newLastLength = moment(lastEventLengthInMillis)
     .format("YYYY-MM-DD hh:mm:ss")
-    .toString();
+		.toString();
 
-  currentEvent.start = newCurrentStart
-  currentEvent.end = newCurrentLength + newCurrentStart
+	lastEvent.start = newLastStart
+	lastEvent.end = newLastLength + newLastStart
 
-  return currentEvent
+	return lastEvent
 }
