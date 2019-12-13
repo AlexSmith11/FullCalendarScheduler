@@ -37,6 +37,7 @@ class App extends Component {
 		const events = eventsResponse.data;
 		const invites = invitesResponse.data;
 
+		// For testing duplicates:
 		// invites.splice(0, 0, invites[0]);
 
 		const renamedEvents = formatParamNamesEvent(events);
@@ -48,6 +49,7 @@ class App extends Component {
 
 		const sheduledEvents = this.schedule(sortedEvents);
 
+		// TODO:
 		// turn all moment objects back into strings - try formatting again
 
 		// Then set scheduled events to calendar state

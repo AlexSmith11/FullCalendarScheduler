@@ -1,9 +1,11 @@
-# Splunk FDSE React Exercise
-This is an exercise designed to test your ability to add features that integrate an API into an existing application, while designing an appropriate algorithm to schedule new events.
+# Full Calendar Event Scheduler
+This is essentially a binary sort of an array of event objects for full calendar
+It is for a specific use case, where you have two API's that supply:
+    - Already confirmed 'events' that you do not wish to move
+    - Invites that you wish to merge into your list of original events, sorted so there are no clashes.
+It also performs other minor functions, such as sorting so that the new invites are within work hours.
 
-Documentation for the API's you must connect to can be found [here](https://documenter.getpostman.com/view/731059/SW11VxZR?version=latest)
-
-Tasks to complete:
+The following are a list of tasks I set myself to to complete:
 - Show the meetings coming from the /events route on the calendar
 - Retrieve the meetings coming from the /invites route on the calendar.
     - If the invited calendar events can be added to the existing calendar without a conflict, add them
@@ -13,10 +15,11 @@ Tasks to complete:
     - You can assume that there will be a free day on the calendar
     - Invites can have conflicts with other invites
 
-
-You can implement this using any method you see fit, using any external systems or libraries.  That being said, we are more concerned with your ability to write clean code and succint algorithims.
-
-If you run into any issues, feel free to reach out via email at `fdse@splunk.com`.
+# Todo's:
+- convert moment objects in the start and end parameters back into Date() string format.
+- Then add these to the calendar state.
+- Create an iterface where users can make their own events, which then get sorted/merged into the calendar state.
+- Display this all on my website.
 
 ## Available Scripts
 
