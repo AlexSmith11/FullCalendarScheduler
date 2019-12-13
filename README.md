@@ -1,8 +1,8 @@
 # Full Calendar Event Scheduler
 This is essentially a binary sort of an array of event objects for full calendar
 It is for a specific use case, where you have two API's that supply:
-    - Already confirmed 'events' that you do not wish to move
-    - Invites that you wish to merge into your list of original events, sorted so there are no clashes.
+- Already confirmed 'events' that you do not wish to move
+- Invites that you wish to merge into your list of original events, sorted so there are no clashes.
 It also performs other minor functions, such as sorting so that the new invites are within work hours.
 
 The following are a list of tasks I set myself to to complete:
