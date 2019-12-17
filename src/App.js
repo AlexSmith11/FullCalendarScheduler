@@ -11,12 +11,11 @@ import {
 	formatParamNamesEvent
 } from "./utils/formatParamNames.js";
 import { sortEvents } from "./utils/sortEvents.js";
-import { eventTime } from "./utils/eventTime";
 import { invitesMatch } from "./utils/invitesMatch";
 import { isInWorkHours, isInWorkDays } from "./utils/isInWorkTime";
 import { moveToWorkHour, moveToWorkDay } from "./utils/moveToWorkTime";
-import { moveLastAfterCurrent } from "./utils/moveLastAfterCurrent";
-import { moveCurrentAfterLast } from "./utils/moveCurrentAfterLast";
+import { formatParamMoments } from "./utils/formatParamMoments";
+
 
 class App extends Component {
 	calendarComponentRef = React.createRef();
@@ -47,12 +46,20 @@ class App extends Component {
 
 		const sortedEvents = sortEvents(allEvents);
 
-		const sheduledEvents = this.schedule(sortedEvents);
+		const scheduledEvents = this.schedule(sortedEvents);
 
 		// TODO:
+		// The following has NOT been tested
 		// turn all moment objects back into strings - try formatting again
+		const scheduledFinal = formatParamMoments(scheduledEvents)
+		console.log(scheduledFinal)
 
 		// Then set scheduled events to calendar state
+		this.setState({
+			// update a property
+			calendarEvents: scheduledFinal
+		});
+
 
 	}
 
@@ -136,6 +143,7 @@ class App extends Component {
 	};
 
 	// Move an event to the end of another.
+	// Not in use dude to debugging elsewhere. Will get round to this later.
 	moveToEnd = (current, next) => {
 		next.start = current.end;
 		next.end = next.start.clone().add(inviteDuration, "milliseconds");
