@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import moment from "moment";
 
 import "./main.scss";
 import { getEvents, getInvites } from "./utils/api.js";
@@ -16,6 +15,11 @@ import { isInWorkHours, isInWorkDays } from "./utils/isInWorkTime";
 import { moveToWorkHour, moveToWorkDay } from "./utils/moveToWorkTime";
 import { formatParamMoments } from "./utils/formatParamMoments";
 
+/**
+ * TODO:
+ * Test moment toString mapper
+ * Create ENV file for API details
+ */
 
 class App extends Component {
 	calendarComponentRef = React.createRef();
@@ -48,15 +52,13 @@ class App extends Component {
 
 		const scheduledEvents = this.schedule(sortedEvents);
 
-		// TODO:
+		// Untested:
 		// The following has NOT been tested
-		// turn all moment objects back into strings - try formatting again
 		const scheduledFinal = formatParamMoments(scheduledEvents)
 		console.log(scheduledFinal)
 
 		// Then set scheduled events to calendar state
 		this.setState({
-			// update a property
 			calendarEvents: scheduledFinal
 		});
 
@@ -144,10 +146,10 @@ class App extends Component {
 
 	// Move an event to the end of another.
 	// Not in use dude to debugging elsewhere. Will get round to this later.
-	moveToEnd = (current, next) => {
-		next.start = current.end;
-		next.end = next.start.clone().add(inviteDuration, "milliseconds");
-	}
+	// moveToEnd = (current, next) => {
+	// 	next.start = current.end;
+	// 	next.end = next.start.clone().add(inviteDuration, "milliseconds");
+	// }
 
 	toggleWeekends = () => {
 		this.setState({

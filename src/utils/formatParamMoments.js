@@ -1,3 +1,5 @@
+import moment from "moment";
+
 /**
  * Re-format the moment values to be date strings, in order for the calendar to read them.
  * Strip unneeded data.
