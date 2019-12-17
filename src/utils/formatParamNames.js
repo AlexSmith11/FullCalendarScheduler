@@ -1,7 +1,12 @@
 import moment from "moment";
 /**
- * Settings for the renaming of events
- * @param {*} items 
+ * Re-format invites to use correct key names
+ * Adds addional params (origS/E) in order to compare between the curr/next events.
+ * Need these as the 'end/start' params values will change after one reschedule pass.
+ * If we then used the changed values and compared between objects, we would not know
+ * if they were originally identical and therefore needed to be removed.
+ * 
+ * @param {object} invites
  */
 export function formatParamNamesInvite(invites) {
   return invites.map(invite => ({
@@ -14,6 +19,11 @@ export function formatParamNamesInvite(invites) {
   }));
 }
 
+/**
+ * Re-format events to use correct key names
+ * 
+ * @param {object} events 
+ */
 export function formatParamNamesEvent(events) {
   return events.map(event => ({
     title: event.name,

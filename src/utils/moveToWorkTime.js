@@ -31,7 +31,7 @@ export function moveToWorkHour(event) {
 
 // If this is called, we know that the day is either sat or sun. Just add 48 hours
 export function moveToWorkDay(event) {
-  // So that the event is always set to 9am
+  // Make event set to 9am
   const inWorkHour = this.moveToWorkHour(event)
   const dayOfEvent = moment(inWorkHour.end).toDate()
   var day = dayOfEvent.getDay();
@@ -53,12 +53,9 @@ export function moveToWorkDay(event) {
     startOfEvent = startOfEventInMillis + millisInDay
     endOfEvent = endOfEventInMillis + millisInDay
   }
-  // convert from millis to date strings
+  // Set the object params to correct/adjusted dates (moments)
   event.start = moment(startOfEvent);
   event.end = moment(endOfEvent);
 
   return event
 }
-
-//TODO:
-// Skip weekend - do this by adding 48 hours plus whatever is left on the friday plus up to 9am monday

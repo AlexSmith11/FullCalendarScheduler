@@ -1,6 +1,6 @@
 /**
  * Return time in millis of duration of event overlap
- * If pos, no overlap
+ * If positive, no overlap
  * @param {*} items
  */
 export function eventTime(a, b) {

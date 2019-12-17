@@ -1,6 +1,7 @@
 /**
  * Return true if all parameters of the two objects match each other
- * @param {*} items
+ * @param {a} items
+ * @param {b} items
  */
 export function invitesMatch(a, b) {
   return (
