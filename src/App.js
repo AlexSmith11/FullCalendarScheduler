@@ -27,7 +27,6 @@ class App extends Component {
 	state = {
 		weekends: false,
 		calendarEvents: [],
-		timeGaps: []
 	};
 
 	componentDidMount() {
