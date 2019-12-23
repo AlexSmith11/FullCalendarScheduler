@@ -34,10 +34,12 @@ class App extends Component {
 	}
 
 	async main() {
-		const eventsResponse = await getEvents();
-		const invitesResponse = await getInvites();
-		const events = eventsResponse.data;
-		const invites = invitesResponse.data;
+		const events = getEvents();
+		const invites = getInvites();
+		// const events = eventsResponse.data;
+		// const invites = invitesResponse.data;
+
+		console.log(events);
 
 		// For testing duplicates:
 		// invites.splice(0, 0, invites[0]);
