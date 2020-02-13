@@ -6,18 +6,18 @@ It is for a specific use case, where you have two API's that supply:
 It also performs other minor functions, such as sorting so that the new invites are within work hours.
 
 The following are a list of tasks I set myself to to complete:
-- Show the meetings coming from the /events route on the calendar
-- Retrieve the meetings coming from the /invites route on the calendar.
-    - If the invited calendar events can be added to the existing calendar without a conflict, add them
-    - If there are events with the same name but at different times, add them.
-    - If there are events with the same name and same times, do not add them. Do not add exact duplicate events
-    - Invites that have no conflicts, but are partially or fully outside business hours should be rescheduled.
-    - You can assume that there will be a free day on the calendar
-    - Invites can have conflicts with other invites
+- Show the meetings coming from the /events route on the calendar [DONE]
+- Retrieve the meetings coming from the /invites route on the calendar. 
+    - If the invited calendar events can be added to the existing calendar without a conflict, add them [DONE]
+    - If there are events with the same name but at different times, add them. [DONE]
+    - If there are events with the same name and same times, do not add them. Do not add exact duplicate events [DONE]
+    - Invites that have no conflicts, but are partially or fully outside business hours should be rescheduled. [DONE]
+    - You can assume that there will be a free day on the calendar [DONE]
+    - Invites can have conflicts with other invites [DONE]
 
 # Todo's:
-- convert moment objects in the start and end parameters back into Date() string format.
-- Then add these to the calendar state.
+- convert moment objects in the start and end parameters back into Date() string format. [DONE]
+- Then add these to the calendar state. [DONE]
 - Create an iterface where users can make their own events, which then get sorted/merged into the calendar state.
 - Display this all on my website.
 
